@@ -45,6 +45,29 @@ require([
             ]
         }
     });
+
+    const routesLayer = new FeatureLayer({
+        url: "https://services2.arcgis.com/GBMwyWOj5RVtr5Jk/arcgis/rest/services/routes_20200616/FeatureServer/0",
+        renderer: {
+            type: "simple",
+            symbol: {
+                type: "simple-line",
+                color: "#00c5ff",
+                width: 1
+            },
+            visualVariables: [
+                {
+                    type: "opacity",
+                    field: "pass_2019_7",
+                    stops: [
+                        {value: 10000, opacity: 0.03},
+                        {value: 30000, opacity: 0.25},
+                        {value: 50000, opacity: 0.80}
+                    ]
+                }
+            ]
+        }
+    });
     
     const basemap = new Basemap({
         portalItem: { id: "1a03412c06cc4d4f8d8f666c8992ad95" } // Custom basemap
@@ -52,7 +75,7 @@ require([
 
     const map = new Map({
         basemap: basemap,
-        layers: [marketsLayer]
+        layers: [routesLayer, marketsLayer]
     });
 
     const view = new MapView({
