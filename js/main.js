@@ -94,17 +94,16 @@ require([
     });
 
     // filter
-    filterRoutesByAirline("United Air Lines Inc.");
+    filterRoutesByAirline("Delta Air Lines Inc.");
 
     function filterRoutesByAirline(airline) {
         // Filter the routes layer to one airline
-        filterLayerByField(routesLayer, 'unique_carrier_name', airline);
+        const whereStatement = `unique_carrier_name = '${airline}'`;
+        filterLayer(routesLayer, whereStatement);
     };
 
-    function filterLayerByField(layer, field, value) {
-        // Filter any layer view using a field name and value
-        const whereStatement = `${field} = '${value}'`;
-
+    function filterLayer(layer, whereStatement) {
+        // Filter any layer view using where statement
         view.whenLayerView(layer).then(function(layerView) {
             layerView.filter = new FeatureFilter({
                 where: whereStatement
