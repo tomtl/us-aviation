@@ -2,12 +2,14 @@ require([
     "esri/Basemap",
     "esri/Map",
     "esri/views/MapView",
-    "esri/layers/FeatureLayer"
+    "esri/layers/FeatureLayer",
+    "esri/views/layers/support/FeatureFilter",
 ], function(
     Basemap,
     Map, 
     MapView,
-    FeatureLayer
+    FeatureLayer,
+    FeatureFilter,
 ) {
     // market points
     const marketsLayer = new FeatureLayer({
@@ -46,8 +48,10 @@ require([
         }
     });
 
+    // routes layer
     const routesLayer = new FeatureLayer({
         url: "https://services2.arcgis.com/GBMwyWOj5RVtr5Jk/arcgis/rest/services/routes_20200616/FeatureServer/0",
+        // definitionExpression: "unique_carrier_name = 'Southwest Airlines Co.'",
         renderer: {
             type: "simple",
             symbol: {
@@ -68,6 +72,10 @@ require([
             ]
         }
     });
+
+    const routesFilter = new FeatureFilter({
+        where: "unique_carrier_name = 'Southwest Airlines Co.'"
+    });
     
     const basemap = new Basemap({
         portalItem: { id: "1a03412c06cc4d4f8d8f666c8992ad95" } // Custom basemap
@@ -83,6 +91,13 @@ require([
         map: map,
         center: [-96.0, 34.0],
         zoom: 4
+    });
+
+    // filter
+    view.whenLayerView(routesLayer).then(function(routesLayerView) {
+        routesLayerView.filter = new FeatureFilter({
+            where: "unique_carrier_name = 'JetBlue Airways'"
+        });
     });
 })
 
