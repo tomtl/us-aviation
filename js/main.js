@@ -94,14 +94,19 @@ require([
     });
 
     // filter
-    filterByAirline("United Air Lines Inc.");
+    filterRoutesByAirline("United Air Lines Inc.");
 
-    function filterByAirline(airline) {
-        const whereStatement = `unique_carrier_name = '${airline}'`;
-        console.log(whereStatement);
+    function filterRoutesByAirline(airline) {
+        // Filter the routes layer to one airline
+        filterLayerByField(routesLayer, 'unique_carrier_name', airline);
+    };
 
-        view.whenLayerView(routesLayer).then(function(routesLayerView) {
-            routesLayerView.filter = new FeatureFilter({
+    function filterLayerByField(layer, field, value) {
+        // Filter any layer view using a field name and value
+        const whereStatement = `${field} = '${value}'`;
+
+        view.whenLayerView(layer).then(function(layerView) {
+            layerView.filter = new FeatureFilter({
                 where: whereStatement
             });
         });
