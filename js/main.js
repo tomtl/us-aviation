@@ -94,11 +94,18 @@ require([
     });
 
     // filter
-    view.whenLayerView(routesLayer).then(function(routesLayerView) {
-        routesLayerView.filter = new FeatureFilter({
-            where: "unique_carrier_name = 'JetBlue Airways'"
+    filterByAirline("United Air Lines Inc.");
+
+    function filterByAirline(airline) {
+        const whereStatement = `unique_carrier_name = '${airline}'`;
+        console.log(whereStatement);
+
+        view.whenLayerView(routesLayer).then(function(routesLayerView) {
+            routesLayerView.filter = new FeatureFilter({
+                where: whereStatement
+            });
         });
-    });
+    };
 })
 
 
