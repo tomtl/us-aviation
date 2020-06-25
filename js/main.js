@@ -4,12 +4,14 @@ require([
     "esri/views/MapView",
     "esri/layers/FeatureLayer",
     "esri/views/layers/support/FeatureFilter",
+    "esri/widgets/Expand"
 ], function(
     Basemap,
     Map, 
     MapView,
     FeatureLayer,
     FeatureFilter,
+    Expand
 ) {
     // market points
     const marketsLayer = new FeatureLayer({
@@ -92,6 +94,48 @@ require([
         center: [-96.0, 34.0],
         zoom: 4
     });
+
+    // airlines filter
+    let airlines = [
+        "Alaska Airlines Inc.",
+        "American Airlines Inc.",
+        "Delta Air Lines Inc.",
+        "JetBlue Airways",
+        "Republic Airline",
+        "Southwest Airlines Co.",
+        "Spirit Air Lines",
+        "United Air Lines Inc."
+    ];
+
+    let airlinesSelect = document.createElement("airlines-select");
+    airlinesSelect.name = "airlines";
+    airlinesSelect.id = "airlines";
+
+    for (const val of airlines) {
+        let airlineItem = document.createElement("div");
+        airlineItem.value = val;
+        airlineItem.text = val;
+        airlineItem.textContent = val;
+        airlineItem.id = "airline-item";
+        airlineItem.class = "airline-item";
+        console.log(airlineItem);
+        airlinesSelect.appendChild(airlineItem);
+    };
+
+    // document.getElementById("airlinesFilter").appendChild(airlinesSelect);
+
+    const airlinesElement = document.getElementById("airlinesFilter");
+    airlinesElement.appendChild(airlinesSelect);
+    airlinesElement.style.visibility = "visible";
+
+    const airlinesExpand = new Expand({
+        view: view,
+        content: airlinesElement,
+        expandIconClass: "esri-icon-filter",
+        group: "top-left"
+    });
+
+    view.ui.add(airlinesExpand, "top-left");
 
     // filter
     filterRoutesByAirline("Delta Air Lines Inc.");
