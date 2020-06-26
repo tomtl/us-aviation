@@ -96,6 +96,7 @@ require([
     });
 
     // airlines filter
+    // list of airlines
     let airlines = [
         "Alaska Airlines Inc.",
         "American Airlines Inc.",
@@ -107,43 +108,35 @@ require([
         "United Air Lines Inc."
     ];
 
+    // build element of airlines for dropdown menu
     let airlinesSelect = document.createElement("select");
-    // airlinesSelect.className = "dropdown-menu";
     airlinesSelect.id = "airlines";
-    // airlinesSelect["aria-labelledby"] = "dropdownMenuButton";
-
 
     for (const val of airlines) {
         let airlineItem = document.createElement("option");
         airlineItem.value = val;
         airlineItem.text = val;
         airlineItem.textContent = val;
-        // airlineItem.id = "airline-item";
-        // airlineItem.className = "dropdown-item";
-        // airlineItem.href = "#";
         airlinesSelect.appendChild(airlineItem);
     };
 
-    document.getElementById("airlinesFilter").appendChild(airlinesSelect);
+    // load filter dropdown with values
+    const airlinesFilterMenu = document.getElementById("airlinesFilter");
+    airlinesFilterMenu.appendChild(airlinesSelect);
 
-    const airlinesElement = document.getElementById("airlinesFilter");
-    airlinesElement.appendChild(airlinesSelect);
-    airlinesElement.style.visibility = "visible";
+    // get user selection from filter dropdown
+    airlinesFilterMenu.addEventListener("click", filterByAirline);
 
-    // const airlinesExpand = new Expand({
-    //     view: view,
-    //     content: airlinesElement,
-    //     expandIconClass: "esri-icon-filter",
-    //     group: "top-left"
-    // });
+    function filterByAirline(event) {
+        const selectedAirline = event.target.getAttribute("value");
+        if (selectedAirline) {
+            filterRoutesByAirline(selectedAirline);
+        }
+    };
 
-    // view.ui.add(airlinesExpand, "top-left");
-
-    // filter
-    filterRoutesByAirline("Delta Air Lines Inc.");
-
+    // filter to one airline in the view
     function filterRoutesByAirline(airline) {
-        // Filter the routes layer to one airline
+        // Filter the routes layer view to one airline
         const whereStatement = `unique_carrier_name = '${airline}'`;
         filterLayer(routesLayer, whereStatement);
     };
