@@ -107,35 +107,37 @@ require([
         "United Air Lines Inc."
     ];
 
-    let airlinesSelect = document.createElement("airlines-select");
-    airlinesSelect.name = "airlines";
+    let airlinesSelect = document.createElement("select");
+    // airlinesSelect.className = "dropdown-menu";
     airlinesSelect.id = "airlines";
+    // airlinesSelect["aria-labelledby"] = "dropdownMenuButton";
+
 
     for (const val of airlines) {
-        let airlineItem = document.createElement("div");
+        let airlineItem = document.createElement("option");
         airlineItem.value = val;
         airlineItem.text = val;
         airlineItem.textContent = val;
-        airlineItem.id = "airline-item";
-        airlineItem.class = "airline-item";
-        console.log(airlineItem);
+        // airlineItem.id = "airline-item";
+        // airlineItem.className = "dropdown-item";
+        // airlineItem.href = "#";
         airlinesSelect.appendChild(airlineItem);
     };
 
-    // document.getElementById("airlinesFilter").appendChild(airlinesSelect);
+    document.getElementById("airlinesFilter").appendChild(airlinesSelect);
 
     const airlinesElement = document.getElementById("airlinesFilter");
     airlinesElement.appendChild(airlinesSelect);
     airlinesElement.style.visibility = "visible";
 
-    const airlinesExpand = new Expand({
-        view: view,
-        content: airlinesElement,
-        expandIconClass: "esri-icon-filter",
-        group: "top-left"
-    });
+    // const airlinesExpand = new Expand({
+    //     view: view,
+    //     content: airlinesElement,
+    //     expandIconClass: "esri-icon-filter",
+    //     group: "top-left"
+    // });
 
-    view.ui.add(airlinesExpand, "top-left");
+    // view.ui.add(airlinesExpand, "top-left");
 
     // filter
     filterRoutesByAirline("Delta Air Lines Inc.");

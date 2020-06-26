@@ -1,32 +1,21 @@
 html,
-body,
+body {
+    margin: 0;
+    padding: 0;
+}
+
 #viewDiv {
     position: fixed;
-    padding: 0;
-    margin: 0;
-    width: 100%;
+    width: 80%;
     height: 100%;
+    left: 25%;
 }
 
-#airlinesFilter { 
-    /* height: 160px; */
-    width: 250px;
-    visibility: hidden;
+#leftPanel {
+    position: absolute;
+    width: 18%;
+    top: 0;
+    bottom: 0;
+    left: 1%;
 }
 
-.airline-item {
-    width: 100%;
-    padding: 12px;
-    text-align: left;
-    vertical-align: baseline;
-    cursor: pointer;
-    height: 40px;
-}
-
-.airline-item:focus {
-    background-color: dimgrey;
-}
-
-.airline-item:hover {
-    background-color: dimgrey;
-}
