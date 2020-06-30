@@ -130,6 +130,9 @@ require([
         function generateAirlinesSelect(airlines){
             let airlinesSelect = document.createElement("select");
             airlinesSelect.id = "airlines";
+
+            // include ALL AIRLINES option
+            airlines.unshift('ALL AIRLINES');
     
             for (const val of airlines) {
                 let airlineItem = document.createElement("option");
@@ -151,8 +154,14 @@ require([
 
         // filter to one airline in the view
         function filterRoutesByAirline(airline) {
-            // Filter the routes layer view to one airline
-            const whereStatement = `unique_carrier_name = '${airline}'`;
+            // Filter the routes layer view by airline
+            let whereStatement = `unique_carrier_name = '${airline}'`;
+
+            // ALL AIRLINES option
+            if (airline == 'ALL AIRLINES') {
+                whereStatement = null;
+            }
+
             filterLayer(routesLayer, whereStatement);
         };
 
