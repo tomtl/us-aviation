@@ -4,14 +4,16 @@ require([
     "esri/views/MapView",
     "esri/layers/FeatureLayer",
     "esri/views/layers/support/FeatureFilter",
-    "esri/widgets/Expand"
+    "esri/core/watchUtils",
+    "esri/renderers/smartMapping/statistics/uniqueValues"
 ], function(
     Basemap,
     Map, 
     MapView,
     FeatureLayer,
     FeatureFilter,
-    Expand
+    watchUtils,
+    uniqueValues
 ) {
     // market points
     const marketsLayer = new FeatureLayer({
@@ -97,57 +99,89 @@ require([
 
     // airlines filter
     // list of airlines
-    let airlines = [
-        "Alaska Airlines Inc.",
-        "American Airlines Inc.",
-        "Delta Air Lines Inc.",
-        "JetBlue Airways",
-        "Republic Airline",
-        "Southwest Airlines Co.",
-        "Spirit Air Lines",
-        "United Air Lines Inc."
-    ];
+    watchUtils.whenFalseOnce(view, "updating", generateAirlinesFilter);
 
-    // build element of airlines for dropdown menu
-    let airlinesSelect = document.createElement("select");
-    airlinesSelect.id = "airlines";
+    function generateAirlinesFilter(){
 
-    for (const val of airlines) {
-        let airlineItem = document.createElement("option");
-        airlineItem.value = val;
-        airlineItem.text = val;
-        airlineItem.textContent = val;
-        airlinesSelect.appendChild(airlineItem);
-    };
+        uniqueValues({
+            layer: routesLayer,
+            field: "unique_carrier_name"
+        }).then(function(response){
+            var infos = response.uniqueValueInfos;
 
-    // load filter dropdown with values
-    const airlinesFilterMenu = document.getElementById("airlinesFilter");
-    airlinesFilterMenu.appendChild(airlinesSelect);
-
-    // get user selection from filter dropdown
-    airlinesFilterMenu.addEventListener("click", filterByAirline);
-
-    function filterByAirline(event) {
-        const selectedAirline = event.target.getAttribute("value");
-        if (selectedAirline) {
-            filterRoutesByAirline(selectedAirline);
-        }
-    };
-
-    // filter to one airline in the view
-    function filterRoutesByAirline(airline) {
-        // Filter the routes layer view to one airline
-        const whereStatement = `unique_carrier_name = '${airline}'`;
-        filterLayer(routesLayer, whereStatement);
-    };
-
-    function filterLayer(layer, whereStatement) {
-        // Filter any layer view using where statement
-        view.whenLayerView(layer).then(function(layerView) {
-            layerView.filter = new FeatureFilter({
-                where: whereStatement
+            var airlineNames = [];
+            infos.forEach(function(info){
+                airlineNames.push(info.value);
             });
+
+            airlineNames.sort()
+
+            let airlinesSelect = generateAirlinesSelect(airlineNames);
+
+            // load filter dropdown with values
+            const airlinesFilterMenu = document.getElementById("airlinesFilter");
+            airlinesFilterMenu.appendChild(airlinesSelect);
+
+            // get user selection from filter dropdown
+            airlinesFilterMenu.addEventListener("click", filterByAirline);
         });
+
+        // build element of airlines for dropdown menu
+        function generateAirlinesSelect(airlines){
+            let airlinesSelect = document.createElement("select");
+            airlinesSelect.id = "airlines";
+    
+            for (const val of airlines) {
+                let airlineItem = document.createElement("option");
+                airlineItem.value = val;
+                airlineItem.text = val;
+                airlineItem.textContent = val;
+                airlinesSelect.appendChild(airlineItem);
+            };
+
+            return airlinesSelect;
+        };
+
+        function filterByAirline(event) {
+            const selectedAirline = event.target.getAttribute("value");
+            if (selectedAirline) {
+                filterRoutesByAirline(selectedAirline);
+            }
+        };
+
+        // filter to one airline in the view
+        function filterRoutesByAirline(airline) {
+            // Filter the routes layer view to one airline
+            const whereStatement = `unique_carrier_name = '${airline}'`;
+            filterLayer(routesLayer, whereStatement);
+        };
+
+        function filterLayer(layer, whereStatement) {
+            // Filter any layer view using where statement
+            view.whenLayerView(layer).then(function(layerView) {
+                layerView.filter = new FeatureFilter({
+                    where: whereStatement
+                });
+            });
+        };
+
+        function generateAirlinesList() {
+            const airlinesList = uniqueValues({
+                layer: routesLayer,
+                field: "unique_carrier_name"
+            }).then(function(response){
+                var infos = response.uniqueValueInfos;
+    
+                var airlineNames = [];
+                infos.forEach(function(info){
+                    airlineNames.push(info.value);
+                });
+    
+                airlineNames.sort()
+                return airlineNames;
+            });
+            return airlinesList;
+        };    
     };
 })
 
