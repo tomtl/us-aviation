@@ -54,6 +54,7 @@ require([
 
     // routes layer
     const routesLayer = new FeatureLayer({
+        title: "routesLayer",
         url: "https://services2.arcgis.com/GBMwyWOj5RVtr5Jk/arcgis/rest/services/routes_20200616/FeatureServer/0",
         // definitionExpression: "unique_carrier_name = 'Southwest Airlines Co.'",
         renderer: {
@@ -77,10 +78,50 @@ require([
         }
     });
 
-    const routesFilter = new FeatureFilter({
-        where: "unique_carrier_name = 'Southwest Airlines Co.'"
-    });
-    
+    const arcadeScript = document.getElementById("routes-arcade").text;
+
+    const routesPopupTemplate = {
+        title: "{origin} - {dest}",
+        content: 
+            // [
+            // {
+                // type: "fields"
+            //     fieldInfos: [
+            //         {
+            //             fieldName: "origin_airport_name",
+            //             label: "Origin airport"
+            //         },
+            //         {
+            //             fieldName: "origin_market_name",
+            //             label: "Origin market"
+            //         },
+            //         {
+            //             fieldName: "dest_airport_name",
+            //             label: "Destination airport"
+            //         },
+            //         {
+            //             fieldName: "dest_market_name",
+            //             label: "Destination market"
+            //         },
+            //         {
+            //             fieldName: "distance_miles",
+            //             label: "Distance (miles)",
+            //             format: {
+            //                 digitSeparator: true,
+            //             }
+            //         }
+            //     ]
+            // }
+            "Stuff",
+        // ]
+        expressionInfos: [{
+            name: "airlines-count",
+            title: "Airlines count",
+            expression: arcadeScript
+        }]
+    };
+    routesLayer.popupTemplate = routesPopupTemplate;
+
     const basemap = new Basemap({
         portalItem: { id: "1a03412c06cc4d4f8d8f666c8992ad95" } // Custom basemap
     });
@@ -96,6 +137,12 @@ require([
         center: [-96.0, 34.0],
         zoom: 4
     });
+
+    // watchUtils.whenFalseOnce(view, "updating", function(){
+    //     routesLayer.popupTemplate = routesPopupTemplate;
+    // });
+
+    
 
     // airlines filter
     // list of airlines

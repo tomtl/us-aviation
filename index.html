@@ -10,7 +10,28 @@
         <link rel="stylesheet" href="css/style.css">
     </head>
     <body>
-        
+        <script type="text/arcgis-arcade" id="routes-arcade">
+            Console("Running arcade expression");
+            var tbl = FeatureSetByName($map, "routesLayer", ["orig", "dest", "unique_carrier_name"], false);
+            var origin = $feature["origin"];
+            var dest = $feature["dest"];
+            var sql = "origin = " + "'" + origin + "'" + " and dest = " + "'" + dest + "'";
+            Console("SQL: " + sql);
+            var routesResult = Filter(tbl, sql);
+            var routesResultCount = Count(routesResult);
+            Console("FILTERED COUNT: " + routesResultCount);
+            
+            if (routesResultCount > 0) {
+                var carriers = "";
+                for (var route in routesResult) {
+                    carriers += route.unique_carrier_name;
+                }
+            }
+
+            Console(carriers);
+            return carriers;
+        </script>
+
         <div id="viewDiv"></div>
 
         <div id="leftPanel">
