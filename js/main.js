@@ -17,7 +17,7 @@ require([
 ) {
     // market points
     const marketsLayer = new FeatureLayer({
-        url: "https://services2.arcgis.com/GBMwyWOj5RVtr5Jk/arcgis/rest/services/markets_20200616/FeatureServer/0",
+        url: "https://services2.arcgis.com/GBMwyWOj5RVtr5Jk/arcgis/rest/services/markets_20200705/FeatureServer/0",
         renderer: {
             type: "simple",
             symbol: {
@@ -32,20 +32,20 @@ require([
             visualVariables: [
                 {
                     type: "size",
-                    field: "pass_2019_7",
+                    field: "pass_2019",
                     stops: [
-                        {value: 100000, size: 4, label: "< 100,000"},
-                        {value: 2500000, size: 17, label: "1 million"},
-                        {value: 5000000, size: 30, label: "> 5 million"},
+                        {value: 1000000, size: 4, label: "< 1 million"},
+                        {value: 25000000, size: 17, label: "10 million"},
+                        {value: 50000000, size: 30, label: "> 50 million"},
                     ]
                 },
                 {                
                     type: "opacity",
-                    field: "pass_2019_7",
+                    field: "pass_2019",
                     stops: [
                         {value: 0, opacity: 0.30},
-                        {value: 100000, opacity: 0.60},
-                        {value: 500000, opacity: 0.90}
+                        {value: 1000000, opacity: 0.60},
+                        {value: 5000000, opacity: 0.90}
                     ]
                 }
             ]
@@ -55,7 +55,7 @@ require([
     // routes layer
     const routesLayer = new FeatureLayer({
         title: "routesLayer",
-        url: "https://services2.arcgis.com/GBMwyWOj5RVtr5Jk/arcgis/rest/services/routes_20200616/FeatureServer/0",
+        url: "https://services2.arcgis.com/GBMwyWOj5RVtr5Jk/arcgis/rest/services/routes_20200705/FeatureServer/0",
         // definitionExpression: "unique_carrier_name = 'Southwest Airlines Co.'",
         renderer: {
             type: "simple",
@@ -67,11 +67,11 @@ require([
             visualVariables: [
                 {
                     type: "opacity",
-                    field: "pass_2019_7",
+                    field: "pass_2019",
                     stops: [
-                        {value: 10000, opacity: 0.03},
-                        {value: 30000, opacity: 0.25},
-                        {value: 50000, opacity: 0.80}
+                        {value: 100000, opacity: 0.05},
+                        {value: 300000, opacity: 0.30},
+                        {value: 500000, opacity: 0.90}
                     ]
                 }
             ]
