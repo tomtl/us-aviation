@@ -140,53 +140,84 @@ require([
     //     routesLayer.popupTemplate = routesPopupTemplate;
     // });
 
+    const filterValues = {
+        airline: "ALL AIRLINES",
+        market: "ALL MARKETS"
+    };
+
     
 
     // airlines filter
     // list of airlines
-    watchUtils.whenFalseOnce(view, "updating", generateAirlinesFilter);
+    watchUtils.whenFalseOnce(view, "updating", generateFilter("unique_carrier_name", "airlines"));
 
-    function generateAirlinesFilter(){
+    function generateFilter(field, attribute){
         uniqueValues({
             layer: routesLayer,
-            field: "unique_carrier_name"
+            field: field
         }).then(function(response){
             var infos = response.uniqueValueInfos;
 
-            var airlineNames = [];
+            var names = [];
             infos.forEach(function(info){
-                airlineNames.push(info.value);
+                names.push(info.value);
             });
 
-            airlineNames.sort()
+            names.sort()
 
-            // Setup airlines dropdown menu options
-            let airlinesSelect = buildFilterDropdown(airlineNames, "airlines");
+            // Setup dropdown menu options
+            let itemsSelect = buildFilterDropdown(names, attribute);
 
             // load filter dropdown with values
-            const airlinesFilterMenu = document.getElementById("airlinesFilter");
-            airlinesFilterMenu.appendChild(airlinesSelect);
+            const elementId = attribute + "Filter";
+            const filterMenu = document.getElementById(elementId);
+            filterMenu.appendChild(itemsSelect);
 
             // get user selection from filter dropdown
-            airlinesFilterMenu.addEventListener("click", filterByAirline);
+            if (attribute == "airlines") {
+                filterMenu.addEventListener("click", filterByAirline)
+            } else if (attribute == "markets") {
+                filterMenu.addEventListener("click", filterByMarket)
+            }
         });
     };
 
     function filterByAirline(event) {
         const selectedAirline = event.target.getAttribute("value");
+        
         if (selectedAirline) {
-            filterRoutesByAirline(selectedAirline);
+            // filterRoutesByAirline(selectedAirline);
+            filterValues.airline = selectedAirline;
+            filterRoutesByAirlineMarket();
         }
     };
 
     // filter to one airline in the view
-    function filterRoutesByAirline(airline) {
-        // Filter the routes layer view by airline
-        let whereStatement = `unique_carrier_name = '${airline}'`;
+    // function filterRoutesByAirline(airline) {
+    //     // Filter the routes layer view by airline
+    //     let whereStatement = `unique_carrier_name = '${airline}'`;
 
-        // ALL AIRLINES option
-        if (airline == 'ALL AIRLINES') {
+    //     // ALL AIRLINES option
+    //     if (airline == 'ALL AIRLINES') {
+    //         whereStatement = null;
+    //     }
+
+    //     filterLayer(routesLayer, whereStatement);
+    // };
+
+    function filterRoutesByAirlineMarket() {
+        let airlineName = filterValues.airline;
+        let marketName = filterValues.market;
+        let whereStatement = "";
+
+        if (airlineName == 'ALL AIRLINES' && marketName == 'ALL MARKETS') {
             whereStatement = null;
+        } else if (airlineName == 'ALL AIRLINES') {
+            whereStatement = `origin_market_name = '${marketName}'`;
+        } else if (marketName == 'ALL MARKETS') {
+            whereStatement = `unique_carrier_name = '${airlineName}'`;
+        } else {
+            whereStatement = `unique_carrier_name = '${airlineName}' AND origin_market_name = '${marketName}'`;
         }
 
         filterLayer(routesLayer, whereStatement);
@@ -194,53 +225,30 @@ require([
 
     // Markets filter
     // list of markets
-    watchUtils.whenFalseOnce(view, "updating", generateMarketsFilter);
-
-    function generateMarketsFilter(){
-        uniqueValues({
-            layer: routesLayer,
-            field: "origin_market_name"
-        }).then(function(response){
-            var infos = response.uniqueValueInfos;
-
-            var marketNames = [];
-            infos.forEach(function(info){
-                marketNames.push(info.value);
-            });
-
-            marketNames.sort()
-
-            // setup dropdown menu options
-            let marketsSelect = buildFilterDropdown(marketNames, "markets");
-
-            // load filter dropdown with values
-            const marketsFilterMenu = document.getElementById("marketsFilter");
-            marketsFilterMenu.appendChild(marketsSelect);
-
-            // get user selection from filter dropdown
-            marketsFilterMenu.addEventListener("click", filterByMarket);
-        });
-    };
+    watchUtils.whenFalseOnce(view, "updating", generateFilter("origin_market_name", "markets"));
 
     function filterByMarket(event) {
         const selectedMarket = event.target.getAttribute("value");
+
         if (selectedMarket) {
-            filterRoutesByMarket(selectedMarket);
+            // filterRoutesByMarket(selectedMarket);
+            filterValues.market = selectedMarket;
+            filterRoutesByAirlineMarket();
         }
     };
 
     // filter to one market in the view
-    function filterRoutesByMarket(market) {
-        // Filter the routes layer view by market
-        let whereStatement = `origin_market_name = '${market}'`;
+    // function filterRoutesByMarket(market) {
+    //     // Filter the routes layer view by market
+    //     let whereStatement = `origin_market_name = '${market}'`;
 
-        // ALL MARKETS option
-        if (market == 'ALL MARKETS') {
-            whereStatement = null;
-        }
+    //     // ALL MARKETS option
+    //     if (market == 'ALL MARKETS') {
+    //         whereStatement = null;
+    //     }
 
-        filterLayer(routesLayer, whereStatement);
-    };
+    //     filterLayer(routesLayer, whereStatement);
+    // };
 
     function buildFilterDropdown(values, id) {
         // build element of airlines or markets for dropdown menu
