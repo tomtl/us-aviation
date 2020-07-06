@@ -218,24 +218,84 @@ require([
                 });
             });
         };
+    };
 
-        function generateAirlinesList() {
-            const airlinesList = uniqueValues({
-                layer: routesLayer,
-                field: "unique_carrier_name"
-            }).then(function(response){
-                var infos = response.uniqueValueInfos;
-    
-                var airlineNames = [];
-                infos.forEach(function(info){
-                    airlineNames.push(info.value);
-                });
-    
-                airlineNames.sort()
-                return airlineNames;
+    // Markets filter
+    // list of markets
+    watchUtils.whenFalseOnce(view, "updating", generateMarketsFilter);
+
+    function generateMarketsFilter(){
+
+        uniqueValues({
+            layer: routesLayer,
+            field: "origin_market_name"
+        }).then(function(response){
+            var infos = response.uniqueValueInfos;
+
+            var marketNames = [];
+            infos.forEach(function(info){
+                marketNames.push(info.value);
             });
-            return airlinesList;
-        };    
+
+            marketNames.sort()
+
+            let marketsSelect = generateMarketsSelect(marketNames);
+
+            // load filter dropdown with values
+            const marketsFilterMenu = document.getElementById("marketsFilter");
+            marketsFilterMenu.appendChild(marketsSelect);
+
+            // get user selection from filter dropdown
+            marketsFilterMenu.addEventListener("click", filterByMarket);
+        });
+
+        // build element of markets for dropdown menu
+        function generateMarketsSelect(markets){
+            let marketsSelect = document.createElement("select");
+            marketsSelect.id = "markets";
+
+            // include ALL MARKETS option
+            markets.unshift('ALL MARKETS');
+    
+            for (const val of markets) {
+                let marketItem = document.createElement("option");
+                marketItem.value = val;
+                marketItem.text = val;
+                marketItem.textContent = val;
+                marketsSelect.appendChild(marketItem);
+            };
+
+            return marketsSelect;
+        };
+
+        function filterByMarket(event) {
+            const selectedMarket = event.target.getAttribute("value");
+            if (selectedMarket) {
+                filterRoutesByMarket(selectedMarket);
+            }
+        };
+
+        // filter to one market in the view
+        function filterRoutesByMarket(market) {
+            // Filter the routes layer view by market
+            let whereStatement = `origin_market_name = '${market}'`;
+
+            // ALL MARKETS option
+            if (market == 'ALL MARKETS') {
+                whereStatement = null;
+            }
+
+            filterLayer(routesLayer, whereStatement);
+        };
+    };
+
+    function filterLayer(layer, whereStatement) {
+        // Filter any layer view using where statement
+        view.whenLayerView(layer).then(function(layerView) {
+            layerView.filter = new FeatureFilter({
+                where: whereStatement
+            });
+        });
     };
 })
 
