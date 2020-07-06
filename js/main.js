@@ -82,43 +82,41 @@ require([
 
     const routesPopupTemplate = {
         title: "{origin} - {dest}",
-        content: 
-            // [
-            // {
-                // type: "fields"
-            //     fieldInfos: [
-            //         {
-            //             fieldName: "origin_airport_name",
-            //             label: "Origin airport"
-            //         },
-            //         {
-            //             fieldName: "origin_market_name",
-            //             label: "Origin market"
-            //         },
-            //         {
-            //             fieldName: "dest_airport_name",
-            //             label: "Destination airport"
-            //         },
-            //         {
-            //             fieldName: "dest_market_name",
-            //             label: "Destination market"
-            //         },
-            //         {
-            //             fieldName: "distance_miles",
-            //             label: "Distance (miles)",
-            //             format: {
-            //                 digitSeparator: true,
-            //             }
-            //         }
-            //     ]
-            // }
-            "Stuff",
-        // ]
-        expressionInfos: [{
-            name: "airlines-count",
-            title: "Airlines count",
-            expression: arcadeScript
-        }]
+        content: [
+            {
+                type: "fields",
+                fieldInfos: [
+                    {
+                        fieldName: "origin_airport_name",
+                        label: "Origin airport"
+                    },
+                    {
+                        fieldName: "origin_market_name",
+                        label: "Origin market"
+                    },
+                    {
+                        fieldName: "dest_airport_name",
+                        label: "Destination airport"
+                    },
+                    {
+                        fieldName: "dest_market_name",
+                        label: "Destination market"
+                    },
+                    {
+                        fieldName: "distance_miles",
+                        label: "Distance (miles)",
+                        format: {
+                            digitSeparator: true,
+                        }
+                    }
+                ]
+            }
+        ]
+        // expressionInfos: [{
+        //     name: "airlines-count",
+        //     title: "Airlines count",
+        //     expression: arcadeScript
+        // }]
     };
     routesLayer.popupTemplate = routesPopupTemplate;
 
