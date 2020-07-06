@@ -161,7 +161,8 @@ require([
 
             airlineNames.sort()
 
-            let airlinesSelect = generateAirlinesSelect(airlineNames);
+            // Setup airlines dropdown menu options
+            let airlinesSelect = buildFilterDropdown(airlineNames, "airlines");
 
             // load filter dropdown with values
             const airlinesFilterMenu = document.getElementById("airlinesFilter");
@@ -170,25 +171,6 @@ require([
             // get user selection from filter dropdown
             airlinesFilterMenu.addEventListener("click", filterByAirline);
         });
-
-        // build element of airlines for dropdown menu
-        function generateAirlinesSelect(airlines){
-            let airlinesSelect = document.createElement("select");
-            airlinesSelect.id = "airlines";
-
-            // include ALL AIRLINES option
-            airlines.unshift('ALL AIRLINES');
-    
-            for (const val of airlines) {
-                let airlineItem = document.createElement("option");
-                airlineItem.value = val;
-                airlineItem.text = val;
-                airlineItem.textContent = val;
-                airlinesSelect.appendChild(airlineItem);
-            };
-
-            return airlinesSelect;
-        };
 
         function filterByAirline(event) {
             const selectedAirline = event.target.getAttribute("value");
@@ -239,7 +221,8 @@ require([
 
             marketNames.sort()
 
-            let marketsSelect = generateMarketsSelect(marketNames);
+            // setup dropdown menu options
+            let marketsSelect = buildFilterDropdown(marketNames, "markets");
 
             // load filter dropdown with values
             const marketsFilterMenu = document.getElementById("marketsFilter");
@@ -248,25 +231,6 @@ require([
             // get user selection from filter dropdown
             marketsFilterMenu.addEventListener("click", filterByMarket);
         });
-
-        // build element of markets for dropdown menu
-        function generateMarketsSelect(markets){
-            let marketsSelect = document.createElement("select");
-            marketsSelect.id = "markets";
-
-            // include ALL MARKETS option
-            markets.unshift('ALL MARKETS');
-    
-            for (const val of markets) {
-                let marketItem = document.createElement("option");
-                marketItem.value = val;
-                marketItem.text = val;
-                marketItem.textContent = val;
-                marketsSelect.appendChild(marketItem);
-            };
-
-            return marketsSelect;
-        };
 
         function filterByMarket(event) {
             const selectedMarket = event.target.getAttribute("value");
@@ -288,6 +252,26 @@ require([
             filterLayer(routesLayer, whereStatement);
         };
     };
+
+    function buildFilterDropdown(values, id) {
+        // build element of airlines or markets for dropdown menu
+        let itemsSelect = document.createElement("select");
+        itemsSelect.id = id;
+
+        // include ALL AIRLINES option
+        allOption = "ALL " + id.toUpperCase();
+        values.unshift(allOption);
+
+        for (const val of values) {
+            let item = document.createElement("option");
+            item.value = val;
+            item.text = val;
+            item.textContent = val;
+            itemsSelect.appendChild(item);
+        };
+
+        return itemsSelect;
+    }
 
     function filterLayer(layer, whereStatement) {
         // Filter any layer view using where statement
