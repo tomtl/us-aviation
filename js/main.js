@@ -147,7 +147,6 @@ require([
     watchUtils.whenFalseOnce(view, "updating", generateAirlinesFilter);
 
     function generateAirlinesFilter(){
-
         uniqueValues({
             layer: routesLayer,
             field: "unique_carrier_name"
@@ -171,35 +170,26 @@ require([
             // get user selection from filter dropdown
             airlinesFilterMenu.addEventListener("click", filterByAirline);
         });
+    };
 
-        function filterByAirline(event) {
-            const selectedAirline = event.target.getAttribute("value");
-            if (selectedAirline) {
-                filterRoutesByAirline(selectedAirline);
-            }
-        };
+    function filterByAirline(event) {
+        const selectedAirline = event.target.getAttribute("value");
+        if (selectedAirline) {
+            filterRoutesByAirline(selectedAirline);
+        }
+    };
 
-        // filter to one airline in the view
-        function filterRoutesByAirline(airline) {
-            // Filter the routes layer view by airline
-            let whereStatement = `unique_carrier_name = '${airline}'`;
+    // filter to one airline in the view
+    function filterRoutesByAirline(airline) {
+        // Filter the routes layer view by airline
+        let whereStatement = `unique_carrier_name = '${airline}'`;
 
-            // ALL AIRLINES option
-            if (airline == 'ALL AIRLINES') {
-                whereStatement = null;
-            }
+        // ALL AIRLINES option
+        if (airline == 'ALL AIRLINES') {
+            whereStatement = null;
+        }
 
-            filterLayer(routesLayer, whereStatement);
-        };
-
-        function filterLayer(layer, whereStatement) {
-            // Filter any layer view using where statement
-            view.whenLayerView(layer).then(function(layerView) {
-                layerView.filter = new FeatureFilter({
-                    where: whereStatement
-                });
-            });
-        };
+        filterLayer(routesLayer, whereStatement);
     };
 
     // Markets filter
@@ -207,7 +197,6 @@ require([
     watchUtils.whenFalseOnce(view, "updating", generateMarketsFilter);
 
     function generateMarketsFilter(){
-
         uniqueValues({
             layer: routesLayer,
             field: "origin_market_name"
@@ -231,26 +220,26 @@ require([
             // get user selection from filter dropdown
             marketsFilterMenu.addEventListener("click", filterByMarket);
         });
+    };
 
-        function filterByMarket(event) {
-            const selectedMarket = event.target.getAttribute("value");
-            if (selectedMarket) {
-                filterRoutesByMarket(selectedMarket);
-            }
-        };
+    function filterByMarket(event) {
+        const selectedMarket = event.target.getAttribute("value");
+        if (selectedMarket) {
+            filterRoutesByMarket(selectedMarket);
+        }
+    };
 
-        // filter to one market in the view
-        function filterRoutesByMarket(market) {
-            // Filter the routes layer view by market
-            let whereStatement = `origin_market_name = '${market}'`;
+    // filter to one market in the view
+    function filterRoutesByMarket(market) {
+        // Filter the routes layer view by market
+        let whereStatement = `origin_market_name = '${market}'`;
 
-            // ALL MARKETS option
-            if (market == 'ALL MARKETS') {
-                whereStatement = null;
-            }
+        // ALL MARKETS option
+        if (market == 'ALL MARKETS') {
+            whereStatement = null;
+        }
 
-            filterLayer(routesLayer, whereStatement);
-        };
+        filterLayer(routesLayer, whereStatement);
     };
 
     function buildFilterDropdown(values, id) {
