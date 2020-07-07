@@ -136,10 +136,6 @@ require([
         zoom: 4
     });
 
-    // watchUtils.whenFalseOnce(view, "updating", function(){
-    //     routesLayer.popupTemplate = routesPopupTemplate;
-    // });
-
     const filterValues = {
         airline: "ALL AIRLINES",
         market: "ALL MARKETS"
@@ -192,20 +188,8 @@ require([
         }
     };
 
-    // filter to one airline in the view
-    // function filterRoutesByAirline(airline) {
-    //     // Filter the routes layer view by airline
-    //     let whereStatement = `unique_carrier_name = '${airline}'`;
-
-    //     // ALL AIRLINES option
-    //     if (airline == 'ALL AIRLINES') {
-    //         whereStatement = null;
-    //     }
-
-    //     filterLayer(routesLayer, whereStatement);
-    // };
-
     function filterRoutesByAirlineMarket() {
+        // Filter by airline and market
         let airlineName = filterValues.airline;
         let marketName = filterValues.market;
         let whereStatement = "";
@@ -236,19 +220,6 @@ require([
             filterRoutesByAirlineMarket();
         }
     };
-
-    // filter to one market in the view
-    // function filterRoutesByMarket(market) {
-    //     // Filter the routes layer view by market
-    //     let whereStatement = `origin_market_name = '${market}'`;
-
-    //     // ALL MARKETS option
-    //     if (market == 'ALL MARKETS') {
-    //         whereStatement = null;
-    //     }
-
-    //     filterLayer(routesLayer, whereStatement);
-    // };
 
     function buildFilterDropdown(values, id) {
         // build element of airlines or markets for dropdown menu
