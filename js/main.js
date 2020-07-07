@@ -15,6 +15,12 @@ require([
     watchUtils,
     uniqueValues
 ) {
+    let filterValues = {
+        airline: "ALL AIRLINES",
+        market: "ALL MARKETS",
+        year: "2019"
+    };
+
     // market points
     const marketsLayer = new FeatureLayer({
         url: "https://services2.arcgis.com/GBMwyWOj5RVtr5Jk/arcgis/rest/services/markets_20200705/FeatureServer/0",
@@ -32,7 +38,7 @@ require([
             visualVariables: [
                 {
                     type: "size",
-                    field: "pass_2019",
+                    field: "pass_" + filterValues.year,
                     stops: [
                         {value: 1000000, size: 4, label: "< 1 million"},
                         {value: 25000000, size: 17, label: "10 million"},
@@ -41,7 +47,7 @@ require([
                 },
                 {                
                     type: "opacity",
-                    field: "pass_2019",
+                    field: "pass_" + filterValues.year,
                     stops: [
                         {value: 0, opacity: 0.30},
                         {value: 1000000, opacity: 0.60},
@@ -67,8 +73,10 @@ require([
             visualVariables: [
                 {
                     type: "opacity",
-                    field: "pass_2019",
+                    field: "pass_" + filterValues.year,
                     stops: [
+                        {value: 0, opacity: 0.00},
+                        {value: 1, opacity: 0.05},
                         {value: 100000, opacity: 0.05},
                         {value: 300000, opacity: 0.30},
                         {value: 500000, opacity: 0.90}
@@ -134,18 +142,12 @@ require([
         map: map,
         center: [-96.0, 34.0],
         zoom: 4
-    });
-
-    const filterValues = {
-        airline: "ALL AIRLINES",
-        market: "ALL MARKETS"
-    };
-
-    
+    });    
 
     // airlines filter
     // list of airlines
     watchUtils.whenFalseOnce(view, "updating", generateFilter("unique_carrier_name", "airlines"));
+    watchUtils.whenFalseOnce(view, "updating", generateFilter("origin_market_name", "markets"));
 
     function generateFilter(field, attribute){
         uniqueValues({
@@ -188,6 +190,17 @@ require([
         }
     };
 
+    // Markets filter
+    function filterByMarket(event) {
+        const selectedMarket = event.target.getAttribute("value");
+
+        if (selectedMarket) {
+            // filterRoutesByMarket(selectedMarket);
+            filterValues.market = selectedMarket;
+            filterRoutesByAirlineMarket();
+        }
+    };
+
     function filterRoutesByAirlineMarket() {
         // Filter by airline and market
         let airlineName = filterValues.airline;
@@ -205,20 +218,6 @@ require([
         }
 
         filterLayer(routesLayer, whereStatement);
-    };
-
-    // Markets filter
-    // list of markets
-    watchUtils.whenFalseOnce(view, "updating", generateFilter("origin_market_name", "markets"));
-
-    function filterByMarket(event) {
-        const selectedMarket = event.target.getAttribute("value");
-
-        if (selectedMarket) {
-            // filterRoutesByMarket(selectedMarket);
-            filterValues.market = selectedMarket;
-            filterRoutesByAirlineMarket();
-        }
     };
 
     function buildFilterDropdown(values, id) {
@@ -249,6 +248,31 @@ require([
             });
         });
     };
+
+    // Year
+    const yearMenu = document.getElementById("yearSelector");
+    yearMenu.addEventListener("click", changeYear);
+
+    function changeYear(event){
+        const selectedYear = event.target.getAttribute("value");
+        if (selectedYear) {
+            filterValues.year = selectedYear;
+
+            // update the routes layer renderer to point to new field
+            let routesRenderer = routesLayer.renderer.clone();
+            routesRenderer.visualVariables[0].field = "pass_" + filterValues.year;
+            routesLayer.renderer = routesRenderer;
+
+            // update the markets layer renderer to point to new field
+            let marketsRenderer = marketsLayer.renderer.clone();
+            marketsRenderer.visualVariables[0].field = "pass_" + filterValues.year;
+            marketsRenderer.visualVariables[1].field = "pass_" + filterValues.year;
+            marketsLayer.renderer = marketsRenderer;
+        }
+        
+    };
+
+
 })
 
 
