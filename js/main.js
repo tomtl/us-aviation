@@ -136,106 +136,118 @@ require([
         zoom: 4
     });
 
-    // watchUtils.whenFalseOnce(view, "updating", function(){
-    //     routesLayer.popupTemplate = routesPopupTemplate;
-    // });
+    const filterValues = {
+        airline: "ALL AIRLINES",
+        market: "ALL MARKETS"
+    };
 
     
 
     // airlines filter
     // list of airlines
-    watchUtils.whenFalseOnce(view, "updating", generateAirlinesFilter);
+    watchUtils.whenFalseOnce(view, "updating", generateFilter("unique_carrier_name", "airlines"));
 
-    function generateAirlinesFilter(){
-
+    function generateFilter(field, attribute){
         uniqueValues({
             layer: routesLayer,
-            field: "unique_carrier_name"
+            field: field
         }).then(function(response){
             var infos = response.uniqueValueInfos;
 
-            var airlineNames = [];
+            var names = [];
             infos.forEach(function(info){
-                airlineNames.push(info.value);
+                names.push(info.value);
             });
 
-            airlineNames.sort()
+            names.sort()
 
-            let airlinesSelect = generateAirlinesSelect(airlineNames);
+            // Setup dropdown menu options
+            let itemsSelect = buildFilterDropdown(names, attribute);
 
             // load filter dropdown with values
-            const airlinesFilterMenu = document.getElementById("airlinesFilter");
-            airlinesFilterMenu.appendChild(airlinesSelect);
+            const elementId = attribute + "Filter";
+            const filterMenu = document.getElementById(elementId);
+            filterMenu.appendChild(itemsSelect);
 
             // get user selection from filter dropdown
-            airlinesFilterMenu.addEventListener("click", filterByAirline);
+            if (attribute == "airlines") {
+                filterMenu.addEventListener("click", filterByAirline)
+            } else if (attribute == "markets") {
+                filterMenu.addEventListener("click", filterByMarket)
+            }
         });
+    };
 
-        // build element of airlines for dropdown menu
-        function generateAirlinesSelect(airlines){
-            let airlinesSelect = document.createElement("select");
-            airlinesSelect.id = "airlines";
+    function filterByAirline(event) {
+        const selectedAirline = event.target.getAttribute("value");
+        
+        if (selectedAirline) {
+            // filterRoutesByAirline(selectedAirline);
+            filterValues.airline = selectedAirline;
+            filterRoutesByAirlineMarket();
+        }
+    };
 
-            // include ALL AIRLINES option
-            airlines.unshift('ALL AIRLINES');
-    
-            for (const val of airlines) {
-                let airlineItem = document.createElement("option");
-                airlineItem.value = val;
-                airlineItem.text = val;
-                airlineItem.textContent = val;
-                airlinesSelect.appendChild(airlineItem);
-            };
+    function filterRoutesByAirlineMarket() {
+        // Filter by airline and market
+        let airlineName = filterValues.airline;
+        let marketName = filterValues.market;
+        let whereStatement = "";
 
-            return airlinesSelect;
+        if (airlineName == 'ALL AIRLINES' && marketName == 'ALL MARKETS') {
+            whereStatement = null;
+        } else if (airlineName == 'ALL AIRLINES') {
+            whereStatement = `origin_market_name = '${marketName}'`;
+        } else if (marketName == 'ALL MARKETS') {
+            whereStatement = `unique_carrier_name = '${airlineName}'`;
+        } else {
+            whereStatement = `unique_carrier_name = '${airlineName}' AND origin_market_name = '${marketName}'`;
+        }
+
+        filterLayer(routesLayer, whereStatement);
+    };
+
+    // Markets filter
+    // list of markets
+    watchUtils.whenFalseOnce(view, "updating", generateFilter("origin_market_name", "markets"));
+
+    function filterByMarket(event) {
+        const selectedMarket = event.target.getAttribute("value");
+
+        if (selectedMarket) {
+            // filterRoutesByMarket(selectedMarket);
+            filterValues.market = selectedMarket;
+            filterRoutesByAirlineMarket();
+        }
+    };
+
+    function buildFilterDropdown(values, id) {
+        // build element of airlines or markets for dropdown menu
+        let itemsSelect = document.createElement("select");
+        itemsSelect.id = id;
+
+        // include ALL AIRLINES option
+        allOption = "ALL " + id.toUpperCase();
+        values.unshift(allOption);
+
+        for (const val of values) {
+            let item = document.createElement("option");
+            item.value = val;
+            item.text = val;
+            item.textContent = val;
+            itemsSelect.appendChild(item);
         };
 
-        function filterByAirline(event) {
-            const selectedAirline = event.target.getAttribute("value");
-            if (selectedAirline) {
-                filterRoutesByAirline(selectedAirline);
-            }
-        };
+        return itemsSelect;
+    }
 
-        // filter to one airline in the view
-        function filterRoutesByAirline(airline) {
-            // Filter the routes layer view by airline
-            let whereStatement = `unique_carrier_name = '${airline}'`;
-
-            // ALL AIRLINES option
-            if (airline == 'ALL AIRLINES') {
-                whereStatement = null;
-            }
-
-            filterLayer(routesLayer, whereStatement);
-        };
-
-        function filterLayer(layer, whereStatement) {
-            // Filter any layer view using where statement
-            view.whenLayerView(layer).then(function(layerView) {
-                layerView.filter = new FeatureFilter({
-                    where: whereStatement
-                });
+    function filterLayer(layer, whereStatement) {
+        // Filter any layer view using where statement
+        view.whenLayerView(layer).then(function(layerView) {
+            layerView.filter = new FeatureFilter({
+                where: whereStatement
             });
-        };
-
-        function generateAirlinesList() {
-            const airlinesList = uniqueValues({
-                layer: routesLayer,
-                field: "unique_carrier_name"
-            }).then(function(response){
-                var infos = response.uniqueValueInfos;
-    
-                var airlineNames = [];
-                infos.forEach(function(info){
-                    airlineNames.push(info.value);
-                });
-    
-                airlineNames.sort()
-                return airlineNames;
-            });
-            return airlinesList;
-        };    
+        });
     };
 })
 
