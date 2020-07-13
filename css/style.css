@@ -10,7 +10,7 @@ body {
     position: absolute;
     height: 100%;
     left: 300px;
-    right: 0px;
+    right: 400px;
 }
 
 #leftPanel {
@@ -19,6 +19,21 @@ body {
     top: 0;
     bottom: 0;
     left: 1%;
+}
+
+#rightPanel {
+    position: absolute;
+    width: 400px;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    color: black;
+    background-color: white;
+}
+
+#chart { 
+    height: 600px;
+    width: 350px;
 }
 
 select {

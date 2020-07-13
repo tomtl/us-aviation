@@ -4,9 +4,14 @@
         <meta charset="utf-8">
         <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
         <title>U.S. Aviation | Tom Lee</title>
-
+       
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@0.7.0"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.css">
+        
         <link rel="stylesheet" href="https://js.arcgis.com/4.15/esri/css/main.css">
         <script src="https://js.arcgis.com/4.15/"></script>
+
         <link rel="stylesheet" href="css/style.css">
     </head>
     <body>
@@ -51,6 +56,11 @@
                     <option value="2017" >2017</option>
                 </select>
             </div>
+        </div>
+
+        <div id="rightPanel">
+            Stats
+            <canvas id="chart"></canvas>
         </div>
 
         <script type="text/javascript" src="js/main.js"></script>

@@ -62,7 +62,7 @@ require([
     const routesLayer = new FeatureLayer({
         title: "routesLayer",
         url: "https://services2.arcgis.com/GBMwyWOj5RVtr5Jk/arcgis/rest/services/routes_20200705/FeatureServer/0",
-        // definitionExpression: "unique_carrier_name = 'Southwest Airlines Co.'",
+        definitionExpression: "unique_carrier_name = 'Southwest Airlines Co.'",  // REMOVE THIS IN PRODUCTION
         renderer: {
             type: "simple",
             symbol: {
@@ -272,7 +272,75 @@ require([
         
     };
 
+    // AIRLINE PASSENGERS PIE CHART
 
+
+    const query = routesLayer.createQuery();
+    query.outStatistics = [{
+        onStatisticField: "pass_" + filterValues.year,
+        outStatisticFieldName: "passengers",
+        statisticType: "sum"
+    }];
+    query.groupByFieldsForStatistics = [ "unique_carrier_name" ];
+
+
+    routesLayer.queryFeatures(query).then(function(response){
+        console.log(response.features[0].attributes); // passengers: 183709, unique_carrier_name: "Omni Air International LLC"
+        
+        let results = response.features;
+        let passengerCounts = {};
+        results.forEach(parseResults);
+        function parseResults(result){
+            passengerCounts[result.attributes["unique_carrier_name"]] = result.attributes.passengers;
+        };
+        console.log(passengerCounts); // { "Omni Air International LLC": 183709, "Iliamna Air Taxi": 446, ... }
+
+        // const labels = Object.keys(passengerCounts);
+        // const data = Object.values(passengerCounts);
+
+        const labels = ['red', 'orange', 'yellow', 'green', 'blue'];
+        const data = [10, 8, 6, 4, 2];
+
+        console.log(labels);
+        console.log(data);
+
+        let ctx = document.getElementById("chart");
+        let myChart = new Chart(ctx, {
+            plugins: [ChartDataLabels],
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: "Passengers",
+                    data: data,
+                    datalabels: {
+                        anchor: 'end',
+                        labels: {
+                            name: {
+                                formatter: function(value, ctx) {
+									return (ctx.chart.data.labels[ctx.dataIndex] + " " + value);
+								}
+                            }
+                        }
+                    }
+                }]
+            },
+            options: {
+                title: {
+                    display: true,
+                    text: "Airline Passenger Counts"
+                },
+                legend: {
+                    display: false,
+                },
+                layout: {
+                    padding: {
+                        bottom: 10
+                    }
+                }
+            }
+        });
+    });
 })
 
 
