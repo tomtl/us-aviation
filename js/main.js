@@ -283,10 +283,7 @@ require([
     }];
     query.groupByFieldsForStatistics = [ "unique_carrier_name" ];
 
-
     routesLayer.queryFeatures(query).then(function(response){
-        console.log(response.features[0].attributes); // passengers: 183709, unique_carrier_name: "Omni Air International LLC"
-        
         let topAirlines = getTopAirlinePassengers(response.features);
 
         // setup the data for the chart
@@ -297,12 +294,6 @@ require([
             labels.push(topAirlines[i].airline);
             data.push(topAirlines[i].passengers);
         }
-
-        // const labels = ['red', 'orange', 'yellow', 'green', 'blue'];
-        // const data = [10, 8, 6, 4, 2];
-
-        console.log(labels);
-        console.log(data);
 
         let ctx = document.getElementById("chart");
         let myChart = new Chart(ctx, {
@@ -315,10 +306,16 @@ require([
                     data: data,
                     datalabels: {
                         anchor: 'end',
+                        offset: 0,
+                        padding: 0,
                         labels: {
                             name: {
+                                align: 'end',
                                 formatter: function(value, ctx) {
-									return (ctx.chart.data.labels[ctx.dataIndex] + " " + value);
+                                    return (
+                                        formatAirlineName(ctx.chart.data.labels[ctx.dataIndex]) + " "
+                                        + Math.sign(value)*((Math.abs(value)/1000000).toFixed(2)) + 'M'
+                                    );
 								}
                             }
                         }
@@ -326,16 +323,17 @@ require([
                 }]
             },
             options: {
-                title: {
-                    display: true,
-                    text: "Airline Passenger Counts"
-                },
+                // title: {
+                //     display: true,
+                //     text: "Airline Passenger Counts"
+                // },
                 legend: {
                     display: false,
                 },
                 layout: {
                     padding: {
-                        bottom: 10
+                        top: 30,
+                        bottom: 30
                     }
                 }
             }
@@ -344,6 +342,7 @@ require([
 
     function getTopAirlinePassengers(results) {
         // Get the top airlines and their passenger counts
+        const topAirlineCount = 6; // The count of Top Airlines to include
 
         // parse the data
         let passengerCounts = [];
@@ -365,8 +364,8 @@ require([
             totalPassengers += passengerCounts[i].passengers;
         }
         
-        // get the top 8 airlines plus a number for Others
-        let topAirlines = passengerCounts.slice(0, 8);
+        // get the top airlines plus a number for Others
+        let topAirlines = passengerCounts.slice(0, topAirlineCount);
         let topAirlinesPassengers = 0;
         for (var i=0; i<topAirlines.length; i++) {
             topAirlinesPassengers += topAirlines[i].passengers;
@@ -375,6 +374,29 @@ require([
         
         return topAirlines;
     };
+
+    function formatAirlineName(airline) {
+        const majorAirlines = {
+            "Southwest Airlines Co.": "Southwest",
+            "Delta Air Lines Inc.": "Delta",
+            "American Airlines Inc.": "American",
+            "United Air Lines Inc.": "United",
+            "JetBlue Airways": "JetBlue",
+            "SkyWest Airlines Inc.": "SkyWest",
+            "Alaska Airlines Inc.": "Alaska",
+            "Spirit Air Lines": "Spirit",
+            "Frontier Airlines Inc.": "Frontier",
+            "Republic Airline": "Republic"
+        };
+
+        if (airline in majorAirlines) {
+            return majorAirlines[airline];
+        } else if (airline.length > 15) {
+            return airline.split(' ')[0];
+        } else {
+            return airline;
+        }
+    }
 })
 
 
