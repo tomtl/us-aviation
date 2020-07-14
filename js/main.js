@@ -287,37 +287,7 @@ require([
     routesLayer.queryFeatures(query).then(function(response){
         console.log(response.features[0].attributes); // passengers: 183709, unique_carrier_name: "Omni Air International LLC"
         
-        let results = response.features;
-        let passengerCounts = [];
-        results.forEach(parseResults);
-        function parseResults(result){
-            let airlinePassengerCount = {};
-            airlinePassengerCount.airline = result.attributes["unique_carrier_name"];
-            airlinePassengerCount.passengers = result.attributes.passengers;
-            passengerCounts.push(airlinePassengerCount);
-        };
-
-        passengerCounts.sort(function(a, b) {
-            return b.passengers - a.passengers;
-        });
-
-        console.log(passengerCounts); // { "Omni Air International LLC": 183709, "Iliamna Air Taxi": 446, ... }
-
-        // get the total passengers
-        let totalPassengers = 0;
-        for (var i=0; i<passengerCounts.length; i++) {
-            totalPassengers += passengerCounts[i].passengers;
-        }
-        console.log(totalPassengers);
-        
-        // get the top 8 airlines
-        let topAirlines = passengerCounts.slice(0, 8);
-        let topAirlinesPassengers = 0;
-        for (var i=0; i<topAirlines.length; i++) {
-            topAirlinesPassengers += topAirlines[i].passengers;
-        }
-        topAirlines.push({airline: 'Others', passengers: totalPassengers - topAirlinesPassengers});
-        console.log(topAirlines);
+        let topAirlines = getTopAirlinePassengers(response.features);
 
         // setup the data for the chart
         let labels = [];
@@ -371,6 +341,40 @@ require([
             }
         });
     });
+
+    function getTopAirlinePassengers(results) {
+        // Get the top airlines and their passenger counts
+
+        // parse the data
+        let passengerCounts = [];
+        results.forEach(parseResults);
+        function parseResults(result){
+            let airlinePassengerCount = {};
+            airlinePassengerCount.airline = result.attributes["unique_carrier_name"];
+            airlinePassengerCount.passengers = result.attributes.passengers;
+            passengerCounts.push(airlinePassengerCount);
+        };
+
+        passengerCounts.sort(function(a, b) {
+            return b.passengers - a.passengers;
+        });
+
+        // get the total passengers
+        let totalPassengers = 0;
+        for (var i=0; i<passengerCounts.length; i++) {
+            totalPassengers += passengerCounts[i].passengers;
+        }
+        
+        // get the top 8 airlines plus a number for Others
+        let topAirlines = passengerCounts.slice(0, 8);
+        let topAirlinesPassengers = 0;
+        for (var i=0; i<topAirlines.length; i++) {
+            topAirlinesPassengers += topAirlines[i].passengers;
+        }
+        topAirlines.push({airline: 'Others', passengers: totalPassengers - topAirlinesPassengers});
+        
+        return topAirlines;
+    };
 })
 
 
