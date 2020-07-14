@@ -62,7 +62,7 @@ require([
     const routesLayer = new FeatureLayer({
         title: "routesLayer",
         url: "https://services2.arcgis.com/GBMwyWOj5RVtr5Jk/arcgis/rest/services/routes_20200705/FeatureServer/0",
-        definitionExpression: "unique_carrier_name = 'Southwest Airlines Co.'",  // REMOVE THIS IN PRODUCTION
+        // definitionExpression: "unique_carrier_name = 'Southwest Airlines Co.'",  
         renderer: {
             type: "simple",
             symbol: {
@@ -288,18 +288,48 @@ require([
         console.log(response.features[0].attributes); // passengers: 183709, unique_carrier_name: "Omni Air International LLC"
         
         let results = response.features;
-        let passengerCounts = {};
+        let passengerCounts = [];
         results.forEach(parseResults);
         function parseResults(result){
-            passengerCounts[result.attributes["unique_carrier_name"]] = result.attributes.passengers;
+            let airlinePassengerCount = {};
+            airlinePassengerCount.airline = result.attributes["unique_carrier_name"];
+            airlinePassengerCount.passengers = result.attributes.passengers;
+            passengerCounts.push(airlinePassengerCount);
         };
+
+        passengerCounts.sort(function(a, b) {
+            return b.passengers - a.passengers;
+        });
+
         console.log(passengerCounts); // { "Omni Air International LLC": 183709, "Iliamna Air Taxi": 446, ... }
 
-        // const labels = Object.keys(passengerCounts);
-        // const data = Object.values(passengerCounts);
+        // get the total passengers
+        let totalPassengers = 0;
+        for (var i=0; i<passengerCounts.length; i++) {
+            totalPassengers += passengerCounts[i].passengers;
+        }
+        console.log(totalPassengers);
+        
+        // get the top 8 airlines
+        let topAirlines = passengerCounts.slice(0, 8);
+        let topAirlinesPassengers = 0;
+        for (var i=0; i<topAirlines.length; i++) {
+            topAirlinesPassengers += topAirlines[i].passengers;
+        }
+        topAirlines.push({airline: 'Others', passengers: totalPassengers - topAirlinesPassengers});
+        console.log(topAirlines);
 
-        const labels = ['red', 'orange', 'yellow', 'green', 'blue'];
-        const data = [10, 8, 6, 4, 2];
+        // setup the data for the chart
+        let labels = [];
+        let data = [];
+
+        for (var i=0; i<topAirlines.length; i++) {
+            labels.push(topAirlines[i].airline);
+            data.push(topAirlines[i].passengers);
+        }
+
+        // const labels = ['red', 'orange', 'yellow', 'green', 'blue'];
+        // const data = [10, 8, 6, 4, 2];
 
         console.log(labels);
         console.log(data);
