@@ -273,8 +273,6 @@ require([
     };
 
     // AIRLINE PASSENGERS PIE CHART
-
-
     const query = routesLayer.createQuery();
     query.outStatistics = [{
         onStatisticField: "pass_" + filterValues.year,
@@ -285,15 +283,7 @@ require([
 
     routesLayer.queryFeatures(query).then(function(response){
         let topAirlines = getTopAirlinePassengers(response.features);
-
-        // setup the data for the chart
-        let labels = [];
-        let data = [];
-
-        for (var i=0; i<topAirlines.length; i++) {
-            labels.push(topAirlines[i].airline);
-            data.push(topAirlines[i].passengers);
-        }
+        let [labels, data ] = setupAirlineChartData(topAirlines);
 
         let ctx = document.getElementById("chart");
         let myChart = new Chart(ctx, {
@@ -396,7 +386,20 @@ require([
         } else {
             return airline;
         }
-    }
+    };
+
+    function setupAirlineChartData(topAirlines) {
+        // setup the data for the chart
+        let labels = [];
+        let data = [];
+
+        for (var i=0; i<topAirlines.length; i++) {
+            labels.push(topAirlines[i].airline);
+            data.push(topAirlines[i].passengers);
+        }
+
+        return [labels, data];
+    };
 })
 
 
