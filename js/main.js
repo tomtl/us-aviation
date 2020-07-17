@@ -149,11 +149,11 @@ require([
     watchUtils.whenFalseOnce(view, "updating", generateFilter("unique_carrier_name", "airlines"));
     watchUtils.whenFalseOnce(view, "updating", generateFilter("origin_market_name", "markets"));
 
+    // Create the chart
     let ctx = document.getElementById("chart");
     let airlinePassengersChart = new Chart(ctx, { type: 'doughnut', data: {} });
-
     createAirlinesChart(airlinePassengersChart);
-    console.log("ORIG CHART: " + airlinePassengersChart);
+
 
     function generateFilter(field, attribute){
         uniqueValues({
@@ -299,45 +299,6 @@ require([
             let [labels, data ] = setupAirlineChartData(topAirlines);
     
             let ctx = document.getElementById("chart");
-            // let myChart = new Chart(ctx, {
-            //     plugins: [ChartDataLabels],
-            //     type: 'doughnut',
-            //     data: {
-            //         labels: labels,
-            //         datasets: [{
-            //             label: "Passengers",
-            //             data: data,
-            //             datalabels: {
-            //                 anchor: 'end',
-            //                 offset: 0,
-            //                 padding: 0,
-            //                 labels: {
-            //                     name: {
-            //                         align: 'end',
-            //                         formatter: function(value, ctx) {
-            //                             return (
-            //                                 formatAirlineName(ctx.chart.data.labels[ctx.dataIndex]) + " "
-            //                                 + Math.sign(value)*((Math.abs(value)/1000000).toFixed(2)) + 'M'
-            //                             );
-            //                         }
-            //                     }
-            //                 }
-            //             }
-            //         }]
-            //     },
-            //     options: {
-            //         legend: {
-            //             display: false,
-            //         },
-            //         layout: {
-            //             padding: {
-            //                 top: 30,
-            //                 bottom: 30
-            //             }
-            //         }
-            //     }
-            // });
-
             
             myChart.plugins = [ChartDataLabels];
             myChart.data = {
@@ -355,7 +316,7 @@ require([
                                 formatter: function(value, ctx) {
                                     return (
                                         formatAirlineName(ctx.chart.data.labels[ctx.dataIndex]) + " "
-                                        + Math.sign(value)*((Math.abs(value)/1000000).toFixed(2)) + 'M'
+                                        + formatNumberLabel(value)
                                     );
                                 }
                             }
@@ -375,20 +336,10 @@ require([
                 }
             };
             myChart.update();
-
-            // return myChart;
         });
     };
 
     function updateAirlinePassengersChart(myChart, filterValues){
-        console.log("CHART: " + myChart)
-        // clear the chart
-        myChart.data.labels.pop();
-        myChart.data.datasets.forEach((dataset) => {
-            dataset.data.pop();
-        });
-        myChart.update();
-
         const query = routesLayer.createQuery();
         query.outStatistics = [{
             onStatisticField: "pass_" + filterValues.year,
@@ -421,7 +372,7 @@ require([
                                 formatter: function(value, ctx) {
                                     return (
                                         formatAirlineName(ctx.chart.data.labels[ctx.dataIndex]) + " "
-                                        + Math.sign(value)*((Math.abs(value)/1000000).toFixed(2)) + 'M'
+                                        + formatNumberLabel(value)
                                     );
                                 }
                             }
@@ -432,6 +383,19 @@ require([
 
             myChart.update();
         });
+    };
+
+    function formatNumberLabel(val) {
+        // Round a value for displaying in a label
+        let label = '';
+
+        if (val > 100000) {
+            label = Math.sign(val)*((Math.abs(val)/1000000).toFixed(3)) + 'M';
+        } else {
+            label = val;
+        }
+
+        return label;
     };
     
 
@@ -460,12 +424,17 @@ require([
         }
         
         // get the top airlines plus a number for Others
-        let topAirlines = passengerCounts.slice(0, topAirlineCount);
-        let topAirlinesPassengers = 0;
-        for (var i=0; i<topAirlines.length; i++) {
-            topAirlinesPassengers += topAirlines[i].passengers;
+        let topAirlines = [];
+        if (passengerCounts.length > topAirlineCount) {
+            topAirlines = passengerCounts.slice(0, topAirlineCount);
+            let topAirlinesPassengers = 0;
+            for (var i=0; i<topAirlines.length; i++) {
+                topAirlinesPassengers += topAirlines[i].passengers;
+            }
+            topAirlines.push({airline: 'Others', passengers: totalPassengers - topAirlinesPassengers});
+        } else {
+            topAirlines = passengerCounts;
         }
-        topAirlines.push({airline: 'Others', passengers: totalPassengers - topAirlinesPassengers});
         
         return topAirlines;
     };
