@@ -205,13 +205,18 @@ require([
             // filterRoutesByMarket(selectedMarket);
             filterValues.market = selectedMarket;
             filterRoutesByAirlineMarket();
+            updateAirlinePassengersChart(airlinePassengersChart, filterValues);
         }
     };
 
     function filterRoutesByAirlineMarket() {
-        // Filter by airline and market
-        let airlineName = filterValues.airline;
-        let marketName = filterValues.market;
+        let whereStatement = createWhereStatement(filterValues);
+        filterLayer(routesLayer, whereStatement);
+    };
+
+    function createWhereStatement(filters) {
+        let airlineName = filters.airline;
+        let marketName = filters.market;
         let whereStatement = "";
 
         if (airlineName == 'ALL AIRLINES' && marketName == 'ALL MARKETS') {
@@ -224,7 +229,7 @@ require([
             whereStatement = `unique_carrier_name = '${airlineName}' AND origin_market_name = '${marketName}'`;
         }
 
-        filterLayer(routesLayer, whereStatement);
+        return whereStatement;
     };
 
     function buildFilterDropdown(values, id) {
@@ -346,10 +351,9 @@ require([
             outStatisticFieldName: "passengers",
             statisticType: "sum"
         }];
-    
-        if (filterValues.airline != "ALL AIRLINES") {
-            query.where = `unique_carrier_name = '${filterValues.airline}'`;
-        }
+
+        let whereStatement = createWhereStatement(filterValues);
+        query.where = whereStatement;
     
         query.groupByFieldsForStatistics = [ "unique_carrier_name" ];
     
