@@ -280,6 +280,9 @@ require([
             marketsRenderer.visualVariables[0].field = "pass_" + filterValues.year;
             marketsRenderer.visualVariables[1].field = "pass_" + filterValues.year;
             marketsLayer.renderer = marketsRenderer;
+
+            // update charts
+            updateAirlinePassengersChart(airlinePassengersChart, filterValues);
         }
         
     };
@@ -402,7 +405,6 @@ require([
         return label;
     };
     
-
     function getTopAirlinePassengers(results) {
         // Get the top airlines and their passenger counts
         const topAirlineCount = 6; // The count of Top Airlines to include
@@ -459,8 +461,10 @@ require([
 
         if (airline in majorAirlines) {
             return majorAirlines[airline];
-        } else if (airline.length > 15) {
+        } else if (airline.length > 15 && airline.split(' ')[0].length > 4) {
             return airline.split(' ')[0];
+        } else if (airline.length > 15 && airline.split(' ')[0].length <= 4) {
+            return airline.split(' ')[0] + ' ' + airline.split(' ')[1];
         } else {
             return airline;
         }
