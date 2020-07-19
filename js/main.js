@@ -150,10 +150,15 @@ require([
     watchUtils.whenFalseOnce(view, "updating", generateFilter("origin_market_name", "markets"));
 
     // Create the chart
-    let ctx = document.getElementById("chart");
+    // Airline Passengers pie chart
+    const ctx = document.getElementById("airlinePassengersChart");
     let airlinePassengersChart = new Chart(ctx, { type: 'doughnut', data: {} });
     createAirlinesChart(airlinePassengersChart);
 
+    // Airline passenger miles pie chart
+    const airlinePassengerMilesCtx = document.getElementById("airlinePassengerMilesChart");
+    let airlinePassengerMilesChart = new Chart(airlinePassengerMilesCtx, { type: "doughnut", data: {} });
+    createAirlinePassengerMilesChart(airlinePassengerMilesChart);
 
     function generateFilter(field, attribute){
         uniqueValues({
@@ -194,6 +199,7 @@ require([
             filterValues.airline = selectedAirline;
             filterRoutesByAirlineMarket();
             updateAirlinePassengersChart(airlinePassengersChart, filterValues);
+            updateAirlinePassengerMilesChart(airlinePassengerMilesChart, filterValues);
         }
     };
 
@@ -206,6 +212,7 @@ require([
             filterValues.market = selectedMarket;
             filterRoutesByAirlineMarket();
             updateAirlinePassengersChart(airlinePassengersChart, filterValues);
+            updateAirlinePassengerMilesChart(airlinePassengerMilesChart, filterValues);
         }
     };
 
@@ -283,6 +290,7 @@ require([
 
             // update charts
             updateAirlinePassengersChart(airlinePassengersChart, filterValues);
+            updateAirlinePassengerMilesChart(airlinePassengerMilesChart, filterValues);
         }
         
     };
@@ -307,6 +315,72 @@ require([
             let [labels, data ] = setupAirlineChartData(topAirlines);
     
             let ctx = document.getElementById("chart");
+            
+            myChart.plugins = [ChartDataLabels];
+            myChart.data = {
+                labels: labels,
+                datasets: [{
+                    label: "Passengers",
+                    data: data,
+                    datalabels: {
+                        anchor: 'end',
+                        offset: 0,
+                        padding: 0,
+                        labels: {
+                            name: {
+                                align: 'end',
+                                formatter: function(value, ctx) {
+                                    return (
+                                        formatAirlineName(ctx.chart.data.labels[ctx.dataIndex]) + " "
+                                        + formatNumberLabel(value)
+                                    );
+                                }
+                            }
+                        }
+                    }
+                }]
+            };
+            myChart.options = {
+                legend: {
+                    display: false,
+                },
+                layout: {
+                    padding: {
+                        top: 30,
+                        bottom: 30
+                    }
+                }
+            };
+            myChart.update();
+        });
+    };
+
+    function createAirlinePassengerMilesChart(myChart){
+        const query = routesLayer.createQuery();
+        query.outStatistics = [
+            {
+                onStatisticField: "pass_" + filterValues.year,
+                outStatisticFieldName: "passengers",
+                statisticType: "sum"
+            },
+            {
+                onStatisticField: "distance_miles",
+                outStatisticFieldName: "distance",
+                statisticType: "avg"
+            }
+        ];
+    
+        if (filterValues.airline != "ALL AIRLINES") {
+            query.where = unique_carrier_name = filterValues.airline;
+        }
+    
+        query.groupByFieldsForStatistics = [ "unique_carrier_name" ];
+    
+        routesLayer.queryFeatures(query).then(function(response){
+            let topAirlines = getTopAirlinePassengerMiles(response.features);
+            let [labels, data ] = setupAirlinePassengerMilesData(topAirlines);
+    
+            let ctx = document.getElementById("airlinePassengerMilesChart");
             
             myChart.plugins = [ChartDataLabels];
             myChart.data = {
@@ -392,14 +466,68 @@ require([
         });
     };
 
+    function updateAirlinePassengerMilesChart(myChart, filterValues){
+        const query = routesLayer.createQuery();
+        query.outStatistics = [
+            {
+                onStatisticField: "pass_" + filterValues.year,
+                outStatisticFieldName: "passengers",
+                statisticType: "sum"
+            },
+            {
+                onStatisticField: "distance_miles",
+                outStatisticFieldName: "distance",
+                statisticType: "avg"
+            }
+        ];
+
+        let whereStatement = createWhereStatement(filterValues);
+        query.where = whereStatement;
+    
+        query.groupByFieldsForStatistics = [ "unique_carrier_name" ];
+    
+        routesLayer.queryFeatures(query).then(function(response){
+            let topAirlines = getTopAirlinePassengerMiles(response.features);
+            let [labels, data ] = setupAirlinePassengerMilesData(topAirlines);
+
+            myChart.data = {
+                labels: labels,
+                datasets: [{
+                    label: "Passengers",
+                    data: data,
+                    datalabels: {
+                        anchor: 'end',
+                        offset: 0,
+                        padding: 0,
+                        labels: {
+                            name: {
+                                align: 'end',
+                                formatter: function(value, ctx) {
+                                    return (
+                                        formatAirlineName(ctx.chart.data.labels[ctx.dataIndex]) + " "
+                                        + formatNumberLabel(value)
+                                    );
+                                }
+                            }
+                        }
+                    }
+                }]
+            };
+
+            myChart.update();
+        });
+    };
+
     function formatNumberLabel(val) {
         // Round a value for displaying in a label
         let label = '';
 
-        if (val > 100000) {
+        if (val > 1000000000) {
+            label = Math.sign(val)*((Math.abs(val)/1000000000).toFixed(3)) + 'B';
+        } else if (val > 1000000) {
             label = Math.sign(val)*((Math.abs(val)/1000000).toFixed(3)) + 'M';
         } else {
-            label = val;
+            label = val.toLocaleString();
         }
 
         return label;
@@ -408,6 +536,7 @@ require([
     function getTopAirlinePassengers(results) {
         // Get the top airlines and their passenger counts
         const topAirlineCount = 6; // The count of Top Airlines to include
+        const minimumPercent = 3; // the minimum percent a value needs to be to be included on chart
 
         // parse the data
         let passengerCounts = [];
@@ -434,12 +563,69 @@ require([
         if (passengerCounts.length > topAirlineCount) {
             topAirlines = passengerCounts.slice(0, topAirlineCount);
             let topAirlinesPassengers = 0;
-            for (var i=0; i<topAirlines.length; i++) {
-                topAirlinesPassengers += topAirlines[i].passengers;
-            }
+            // for (var i=0; i<topAirlines.length; i++) {
+            //     topAirlinesPassengers += topAirlines[i].passengers;
+            // }
+            let spliceCount = 0;
+            topAirlines.forEach(function(entry, index, obj) {
+                if (entry.passengers < totalPassengers * (minimumPercent / 100.0)) {
+                    topAirlines = topAirlines.slice(0, index);
+                } else {
+                    topAirlinesPassengers += entry.passengers;
+                }
+            })
             topAirlines.push({airline: 'Others', passengers: totalPassengers - topAirlinesPassengers});
         } else {
             topAirlines = passengerCounts;
+        }
+        
+        return topAirlines;
+    };
+
+    function getTopAirlinePassengerMiles(results) {
+        // Get the top airlines and their passenger counts
+        const topAirlineCount = 6; // The count of Top Airlines to include
+        const minimumPercent = 3; // the minimum percent a value needs to be to be included on chart
+
+        // parse the data
+        let passengerMiles = [];
+        results.forEach(parseResults);
+        function parseResults(result){
+            let airlinePassengerCount = {};
+            airlinePassengerCount.airline = result.attributes["unique_carrier_name"];
+            airlinePassengerCount.passengerMiles = result.attributes.passengers * result.attributes.distance;
+            passengerMiles.push(airlinePassengerCount);
+        };
+
+        passengerMiles.sort(function(a, b) {
+            return b.passengerMiles - a.passengerMiles;
+        });
+
+        // get the total passengers
+        let totalPassengerMiles = 0;
+        for (var i=0; i<passengerMiles.length; i++) {
+            totalPassengerMiles += passengerMiles[i].passengerMiles;
+        }
+        
+        // get the top airlines plus a number for Others
+        let topAirlines = [];
+        if (passengerMiles.length > topAirlineCount) {
+            topAirlines = passengerMiles.slice(0, topAirlineCount);
+            let topAirlinesPassengerMiles = 0;
+            // for (var i=0; i<topAirlines.length; i++) {
+            //     topAirlinesPassengers += topAirlines[i].passengers;
+            // }
+            let spliceCount = 0;
+            topAirlines.forEach(function(entry, index, obj) {
+                if (entry.passengerMiles < totalPassengerMiles * (minimumPercent / 100.0)) {
+                    topAirlines = topAirlines.slice(0, index);
+                } else {
+                    topAirlinesPassengerMiles += entry.passengerMiles;
+                }
+            })
+            topAirlines.push({airline: 'Others', passengerMiles: totalPassengerMiles - topAirlinesPassengerMiles});
+        } else {
+            topAirlines = passengerMiles;
         }
         
         return topAirlines;
@@ -478,6 +664,19 @@ require([
         for (var i=0; i<topAirlines.length; i++) {
             labels.push(topAirlines[i].airline);
             data.push(topAirlines[i].passengers);
+        }
+
+        return [labels, data];
+    };
+
+    function setupAirlinePassengerMilesData(topAirlines) {
+        // setup the data for the chart
+        let labels = [];
+        let data = [];
+
+        for (var i=0; i<topAirlines.length; i++) {
+            labels.push(topAirlines[i].airline);
+            data.push(topAirlines[i].passengerMiles);
         }
 
         return [labels, data];
