@@ -296,67 +296,88 @@ require([
     };
 
     // AIRLINE PASSENGERS PIE CHART
-    function createAirlinesChart(myChart){
-        const query = routesLayer.createQuery();
+    function createAirlinesChart(chart){
+        // Create the airline passenger counts pie chart
+        const query = createAirlinePassengersQuery(routesLayer);
+    
+        routesLayer.queryFeatures(query).then(function(response){
+            let topAirlines = getTopAirlinePassengers(response.features);
+            let [labels, data ] = setupAirlineChartData(topAirlines);
+    
+            loadPieChart(chart, labels, data);
+        });
+    };
+
+    function createAirlinePassengersQuery(layer){
+        // Create the query for the airline passenger counts pie chart
+        const query = layer.createQuery();
         query.outStatistics = [{
             onStatisticField: "pass_" + filterValues.year,
             outStatisticFieldName: "passengers",
             statisticType: "sum"
         }];
     
-        if (filterValues.airline != "ALL AIRLINES") {
-            query.where = unique_carrier_name = filterValues.airline;
-        }
+        let whereStatement = createWhereStatement(filterValues);
+        query.where = whereStatement;
     
         query.groupByFieldsForStatistics = [ "unique_carrier_name" ];
-    
-        routesLayer.queryFeatures(query).then(function(response){
-            let topAirlines = getTopAirlinePassengers(response.features);
-            let [labels, data ] = setupAirlineChartData(topAirlines);
-    
-            let ctx = document.getElementById("chart");
-            
-            myChart.plugins = [ChartDataLabels];
-            myChart.data = {
-                labels: labels,
-                datasets: [{
-                    label: "Passengers",
-                    data: data,
-                    datalabels: {
-                        anchor: 'end',
-                        offset: 0,
-                        padding: 0,
-                        labels: {
-                            name: {
-                                align: 'end',
-                                formatter: function(value, ctx) {
-                                    return (
-                                        formatAirlineName(ctx.chart.data.labels[ctx.dataIndex]) + " "
-                                        + formatNumberLabel(value)
-                                    );
-                                }
+        return query;
+    };
+
+    function loadPieChart(chart, labels, data){
+        // load and format data for pie chart
+        chart.plugins = [ChartDataLabels];
+        chart.data = {
+            labels: labels,
+            datasets: [{
+                data: data,
+                datalabels: {
+                    anchor: 'end',
+                    offset: 0,
+                    padding: 0,
+                    labels: {
+                        name: {
+                            align: 'end',
+                            formatter: function(value, ctx) {
+                                return (
+                                    formatAirlineName(ctx.chart.data.labels[ctx.dataIndex]) + " "
+                                    + formatNumberLabel(value)
+                                );
                             }
                         }
                     }
-                }]
-            };
-            myChart.options = {
-                legend: {
-                    display: false,
-                },
-                layout: {
-                    padding: {
-                        top: 30,
-                        bottom: 30
-                    }
                 }
-            };
-            myChart.update();
+            }]
+        };
+        chart.options = {
+            legend: {
+                display: false,
+            },
+            layout: {
+                padding: {
+                    top: 30,
+                    bottom: 30
+                }
+            }
+        };
+        chart.update();
+    };
+
+    function createAirlinePassengerMilesChart(chart){
+        // Create the airline passenger miles pie chart
+        const query = createAirlinePassengerMilesQuery(routesLayer);
+    
+        routesLayer.queryFeatures(query).then(function(response){
+            let topAirlines = getTopAirlinePassengerMiles(response.features);
+            let [labels, data ] = setupAirlinePassengerMilesData(topAirlines);
+    
+            loadPieChart(chart, labels, data);
         });
     };
 
-    function createAirlinePassengerMilesChart(myChart){
-        const query = routesLayer.createQuery();
+    function createAirlinePassengerMilesQuery(layer){
+        // Create the query for the airline passenger miles chart
+        const query = layer.createQuery();
         query.outStatistics = [
             {
                 onStatisticField: "pass_" + filterValues.year,
@@ -370,151 +391,35 @@ require([
             }
         ];
     
-        if (filterValues.airline != "ALL AIRLINES") {
-            query.where = unique_carrier_name = filterValues.airline;
-        }
-    
-        query.groupByFieldsForStatistics = [ "unique_carrier_name" ];
-    
-        routesLayer.queryFeatures(query).then(function(response){
-            let topAirlines = getTopAirlinePassengerMiles(response.features);
-            let [labels, data ] = setupAirlinePassengerMilesData(topAirlines);
-    
-            let ctx = document.getElementById("airlinePassengerMilesChart");
-            
-            myChart.plugins = [ChartDataLabels];
-            myChart.data = {
-                labels: labels,
-                datasets: [{
-                    label: "Passengers",
-                    data: data,
-                    datalabels: {
-                        anchor: 'end',
-                        offset: 0,
-                        padding: 0,
-                        labels: {
-                            name: {
-                                align: 'end',
-                                formatter: function(value, ctx) {
-                                    return (
-                                        formatAirlineName(ctx.chart.data.labels[ctx.dataIndex]) + " "
-                                        + formatNumberLabel(value)
-                                    );
-                                }
-                            }
-                        }
-                    }
-                }]
-            };
-            myChart.options = {
-                legend: {
-                    display: false,
-                },
-                layout: {
-                    padding: {
-                        top: 30,
-                        bottom: 30
-                    }
-                }
-            };
-            myChart.update();
-        });
-    };
-
-    function updateAirlinePassengersChart(myChart, filterValues){
-        const query = routesLayer.createQuery();
-        query.outStatistics = [{
-            onStatisticField: "pass_" + filterValues.year,
-            outStatisticFieldName: "passengers",
-            statisticType: "sum"
-        }];
-
         let whereStatement = createWhereStatement(filterValues);
         query.where = whereStatement;
     
         query.groupByFieldsForStatistics = [ "unique_carrier_name" ];
+
+        return query;
+    };
+
+    function updateAirlinePassengersChart(chart, filterValues){
+        // update the airline passenger chart when filters change
+        const query = createAirlinePassengersQuery(routesLayer);
     
         routesLayer.queryFeatures(query).then(function(response){
             let topAirlines = getTopAirlinePassengers(response.features);
             let [labels, data ] = setupAirlineChartData(topAirlines);
 
-            myChart.data = {
-                labels: labels,
-                datasets: [{
-                    label: "Passengers",
-                    data: data,
-                    datalabels: {
-                        anchor: 'end',
-                        offset: 0,
-                        padding: 0,
-                        labels: {
-                            name: {
-                                align: 'end',
-                                formatter: function(value, ctx) {
-                                    return (
-                                        formatAirlineName(ctx.chart.data.labels[ctx.dataIndex]) + " "
-                                        + formatNumberLabel(value)
-                                    );
-                                }
-                            }
-                        }
-                    }
-                }]
-            };
-
-            myChart.update();
+            loadPieChart(chart, labels, data);
         });
     };
 
-    function updateAirlinePassengerMilesChart(myChart, filterValues){
-        const query = routesLayer.createQuery();
-        query.outStatistics = [
-            {
-                onStatisticField: "pass_" + filterValues.year,
-                outStatisticFieldName: "passengers",
-                statisticType: "sum"
-            },
-            {
-                onStatisticField: "distance_miles",
-                outStatisticFieldName: "distance",
-                statisticType: "avg"
-            }
-        ];
-
-        let whereStatement = createWhereStatement(filterValues);
-        query.where = whereStatement;
-    
-        query.groupByFieldsForStatistics = [ "unique_carrier_name" ];
+    function updateAirlinePassengerMilesChart(chart, filterValues){
+        // update the airline passenger miles chart when filters change
+        const query = createAirlinePassengerMilesQuery(routesLayer);
     
         routesLayer.queryFeatures(query).then(function(response){
             let topAirlines = getTopAirlinePassengerMiles(response.features);
             let [labels, data ] = setupAirlinePassengerMilesData(topAirlines);
 
-            myChart.data = {
-                labels: labels,
-                datasets: [{
-                    label: "Passengers",
-                    data: data,
-                    datalabels: {
-                        anchor: 'end',
-                        offset: 0,
-                        padding: 0,
-                        labels: {
-                            name: {
-                                align: 'end',
-                                formatter: function(value, ctx) {
-                                    return (
-                                        formatAirlineName(ctx.chart.data.labels[ctx.dataIndex]) + " "
-                                        + formatNumberLabel(value)
-                                    );
-                                }
-                            }
-                        }
-                    }
-                }]
-            };
-
-            myChart.update();
+            loadPieChart(chart, labels, data);
         });
     };
 
@@ -563,10 +468,7 @@ require([
         if (passengerCounts.length > topAirlineCount) {
             topAirlines = passengerCounts.slice(0, topAirlineCount);
             let topAirlinesPassengers = 0;
-            // for (var i=0; i<topAirlines.length; i++) {
-            //     topAirlinesPassengers += topAirlines[i].passengers;
-            // }
-            let spliceCount = 0;
+            // let spliceCount = 0;
             topAirlines.forEach(function(entry, index, obj) {
                 if (entry.passengers < totalPassengers * (minimumPercent / 100.0)) {
                     topAirlines = topAirlines.slice(0, index);
@@ -612,10 +514,7 @@ require([
         if (passengerMiles.length > topAirlineCount) {
             topAirlines = passengerMiles.slice(0, topAirlineCount);
             let topAirlinesPassengerMiles = 0;
-            // for (var i=0; i<topAirlines.length; i++) {
-            //     topAirlinesPassengers += topAirlines[i].passengers;
-            // }
-            let spliceCount = 0;
+            // let spliceCount = 0;
             topAirlines.forEach(function(entry, index, obj) {
                 if (entry.passengerMiles < totalPassengerMiles * (minimumPercent / 100.0)) {
                     topAirlines = topAirlines.slice(0, index);
@@ -632,6 +531,7 @@ require([
     };
 
     function formatAirlineName(airline) {
+        // format airline names for displaying in a label
         const majorAirlines = {
             "Southwest Airlines Co.": "Southwest",
             "Delta Air Lines Inc.": "Delta",
