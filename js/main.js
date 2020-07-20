@@ -153,12 +153,12 @@ require([
     // Airline Passengers pie chart
     const ctx = document.getElementById("airlinePassengersChart");
     let airlinePassengersChart = new Chart(ctx, { type: 'doughnut', data: {} });
-    createAirlinesChart(airlinePassengersChart);
+    updateAirlinePassengersChart(airlinePassengersChart);
 
     // Airline passenger miles pie chart
     const airlinePassengerMilesCtx = document.getElementById("airlinePassengerMilesChart");
     let airlinePassengerMilesChart = new Chart(airlinePassengerMilesCtx, { type: "doughnut", data: {} });
-    createAirlinePassengerMilesChart(airlinePassengerMilesChart);
+    updateAirlinePassengerMilesChart(airlinePassengerMilesChart);
 
     function generateFilter(field, attribute){
         uniqueValues({
@@ -295,15 +295,27 @@ require([
         
     };
 
-    // AIRLINE PASSENGERS PIE CHART
-    function createAirlinesChart(chart){
-        // Create the airline passenger counts pie chart
+    // AIRLINE PASSENGERS PIE CHARTS
+    // function createAirlinesChart(chart){
+    //     // Create the airline passenger counts pie chart
+    //     const query = createAirlinePassengersQuery(routesLayer);
+    
+    //     routesLayer.queryFeatures(query).then(function(response){
+    //         let topAirlinesByPassengers = getTopAirlinePassengers(response.features);
+    //         let [labels, data ] = setupAirlineChartData(topAirlinesByPassengers);
+    
+    //         loadPieChart(chart, labels, data);
+    //     });
+    // };
+
+    function updateAirlinePassengersChart(chart){
+        // update the airline passenger chart when filters change
         const query = createAirlinePassengersQuery(routesLayer);
     
         routesLayer.queryFeatures(query).then(function(response){
             let topAirlines = getTopAirlinePassengers(response.features);
             let [labels, data ] = setupAirlineChartData(topAirlines);
-    
+
             loadPieChart(chart, labels, data);
         });
     };
@@ -363,14 +375,14 @@ require([
         chart.update();
     };
 
-    function createAirlinePassengerMilesChart(chart){
-        // Create the airline passenger miles pie chart
+    function updateAirlinePassengerMilesChart(chart, filterValues){
+        // update the airline passenger miles chart when filters change
         const query = createAirlinePassengerMilesQuery(routesLayer);
     
         routesLayer.queryFeatures(query).then(function(response){
             let topAirlines = getTopAirlinePassengerMiles(response.features);
             let [labels, data ] = setupAirlinePassengerMilesData(topAirlines);
-    
+
             loadPieChart(chart, labels, data);
         });
     };
@@ -397,30 +409,6 @@ require([
         query.groupByFieldsForStatistics = [ "unique_carrier_name" ];
 
         return query;
-    };
-
-    function updateAirlinePassengersChart(chart, filterValues){
-        // update the airline passenger chart when filters change
-        const query = createAirlinePassengersQuery(routesLayer);
-    
-        routesLayer.queryFeatures(query).then(function(response){
-            let topAirlines = getTopAirlinePassengers(response.features);
-            let [labels, data ] = setupAirlineChartData(topAirlines);
-
-            loadPieChart(chart, labels, data);
-        });
-    };
-
-    function updateAirlinePassengerMilesChart(chart, filterValues){
-        // update the airline passenger miles chart when filters change
-        const query = createAirlinePassengerMilesQuery(routesLayer);
-    
-        routesLayer.queryFeatures(query).then(function(response){
-            let topAirlines = getTopAirlinePassengerMiles(response.features);
-            let [labels, data ] = setupAirlinePassengerMilesData(topAirlines);
-
-            loadPieChart(chart, labels, data);
-        });
     };
 
     function formatNumberLabel(val) {
@@ -468,7 +456,6 @@ require([
         if (passengerCounts.length > topAirlineCount) {
             topAirlines = passengerCounts.slice(0, topAirlineCount);
             let topAirlinesPassengers = 0;
-            // let spliceCount = 0;
             topAirlines.forEach(function(entry, index, obj) {
                 if (entry.passengers < totalPassengers * (minimumPercent / 100.0)) {
                     topAirlines = topAirlines.slice(0, index);
@@ -514,7 +501,6 @@ require([
         if (passengerMiles.length > topAirlineCount) {
             topAirlines = passengerMiles.slice(0, topAirlineCount);
             let topAirlinesPassengerMiles = 0;
-            // let spliceCount = 0;
             topAirlines.forEach(function(entry, index, obj) {
                 if (entry.passengerMiles < totalPassengerMiles * (minimumPercent / 100.0)) {
                     topAirlines = topAirlines.slice(0, index);
