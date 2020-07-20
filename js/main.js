@@ -198,8 +198,8 @@ require([
             // filterRoutesByAirline(selectedAirline);
             filterValues.airline = selectedAirline;
             filterRoutesByAirlineMarket();
-            updateAirlinePassengersChart(airlinePassengersChart, filterValues);
-            updateAirlinePassengerMilesChart(airlinePassengerMilesChart, filterValues);
+            updateAirlinePassengersChart(airlinePassengersChart);
+            updateAirlinePassengerMilesChart(airlinePassengerMilesChart);
         }
     };
 
@@ -211,8 +211,8 @@ require([
             // filterRoutesByMarket(selectedMarket);
             filterValues.market = selectedMarket;
             filterRoutesByAirlineMarket();
-            updateAirlinePassengersChart(airlinePassengersChart, filterValues);
-            updateAirlinePassengerMilesChart(airlinePassengerMilesChart, filterValues);
+            updateAirlinePassengersChart(airlinePassengersChart);
+            updateAirlinePassengerMilesChart(airlinePassengerMilesChart);
         }
     };
 
@@ -289,8 +289,8 @@ require([
             marketsLayer.renderer = marketsRenderer;
 
             // update charts
-            updateAirlinePassengersChart(airlinePassengersChart, filterValues);
-            updateAirlinePassengerMilesChart(airlinePassengerMilesChart, filterValues);
+            updateAirlinePassengersChart(airlinePassengersChart);
+            updateAirlinePassengerMilesChart(airlinePassengerMilesChart);
         }
         
     };
