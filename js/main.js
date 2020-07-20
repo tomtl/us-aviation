@@ -296,18 +296,6 @@ require([
     };
 
     // AIRLINE PASSENGERS PIE CHARTS
-    // function createAirlinesChart(chart){
-    //     // Create the airline passenger counts pie chart
-    //     const query = createAirlinePassengersQuery(routesLayer);
-    
-    //     routesLayer.queryFeatures(query).then(function(response){
-    //         let topAirlinesByPassengers = getTopAirlinePassengers(response.features);
-    //         let [labels, data ] = setupAirlineChartData(topAirlinesByPassengers);
-    
-    //         loadPieChart(chart, labels, data);
-    //     });
-    // };
-
     function updateAirlinePassengersChart(chart){
         // update the airline passenger chart when filters change
         const query = createAirlinePassengersQuery(routesLayer);
