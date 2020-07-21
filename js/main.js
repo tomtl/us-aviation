@@ -331,6 +331,11 @@ require([
             labels: labels,
             datasets: [{
                 data: data,
+                backgroundColor: function(item){
+                    const airline = item.chart.data.labels[item.dataIndex];
+                    return setChartColor(airline, item.dataIndex);
+                },
+                borderWidth: "1",
                 datalabels: {
                     anchor: 'end',
                     offset: 0,
@@ -343,7 +348,8 @@ require([
                                     formatAirlineName(ctx.chart.data.labels[ctx.dataIndex]) + " "
                                     + formatNumberLabel(value)
                                 );
-                            }
+                            },
+                            color: '#eee'
                         }
                     }
                 }
@@ -357,6 +363,15 @@ require([
                 padding: {
                     top: 30,
                     bottom: 30
+                }
+            },
+            tooltips: {
+                callbacks: {
+                    label: function(tooltipItem, data) {
+                        const label = data.labels[tooltipItem.index];
+                        const value = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+                        return label + ": " + formatNumberLabel(value);
+                    }
                 }
             }
         };
@@ -417,7 +432,7 @@ require([
     function getTopAirlinePassengers(results) {
         // Get the top airlines and their passenger counts
         const topAirlineCount = 6; // The count of Top Airlines to include
-        const minimumPercent = 3; // the minimum percent a value needs to be to be included on chart
+        const minimumPercent = 5; // the minimum percent a value needs to be to be included on chart
 
         // parse the data
         let passengerCounts = [];
@@ -462,7 +477,7 @@ require([
     function getTopAirlinePassengerMiles(results) {
         // Get the top airlines and their passenger counts
         const topAirlineCount = 6; // The count of Top Airlines to include
-        const minimumPercent = 3; // the minimum percent a value needs to be to be included on chart
+        const minimumPercent = 4; // the minimum percent a value needs to be to be included on chart
 
         // parse the data
         let passengerMiles = [];
@@ -554,6 +569,42 @@ require([
         }
 
         return [labels, data];
+    };
+
+    function setChartColor(airline, index){
+        const majorAirlines = {
+            "Southwest Airlines Co.": "#FFBF1F",
+            "Delta Air Lines Inc.": "#E51937",
+            "American Airlines Inc.": "#0075CD",
+            "United Air Lines Inc.": "#2EC0FF",
+            "JetBlue Airways": "#0033A0",
+            "SkyWest Airlines Inc.": "#52FF7D",
+            "Alaska Airlines Inc.": "#AE52FF",
+            "Spirit Air Lines": "#FFF152",
+            "Frontier Airlines Inc.": "#45D960",
+            "Republic Airline": "#D97ECD",
+            "Others": "#d9d9d9"
+        };
+
+        const others = {
+            "0": "#99FFF0",
+            "1": "#fbb4ae",
+            "2": "#b3cde3",
+            "3": "#ccebc5",
+            "4": "#decbe4",
+            "5": "#fed9a6",
+            "6": "#ffffcc",
+            "7": "#e5d8bd",
+            "8": "#fddaec",
+            "9": "#d9d9d9",
+            "10": "#bc80bd"
+        };
+
+        if (airline in majorAirlines) {
+            return majorAirlines[airline];
+        } else {
+            return others[index];
+        }
     };
 })
 
