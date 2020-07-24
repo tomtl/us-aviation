@@ -206,6 +206,7 @@ require([
             filterRoutesByAirlineMarket();
             updateAirlinePassengersChart(airlinePassengersChart);
             updateAirlinePassengerMilesChart(airlinePassengerMilesChart);
+            updateMarketPassengersChart(marketPassengersChart);
         }
     };
 
@@ -219,6 +220,7 @@ require([
             filterRoutesByAirlineMarket();
             updateAirlinePassengersChart(airlinePassengersChart);
             updateAirlinePassengerMilesChart(airlinePassengerMilesChart);
+            updateMarketPassengersChart(marketPassengersChart);
         }
     };
 
@@ -297,6 +299,7 @@ require([
             // update charts
             updateAirlinePassengersChart(airlinePassengersChart);
             updateAirlinePassengerMilesChart(airlinePassengerMilesChart);
+            updateMarketPassengersChart(marketPassengersChart);
         }
         
     };
@@ -344,10 +347,10 @@ require([
                 borderWidth: "1",
                 datalabels: {
                     anchor: 'end',
-                    offset: 0,
                     padding: 0,
                     labels: {
                         name: {
+                            anchor: "end",
                             align: 'end',
                             formatter: function(value, ctx) {
                                 return (
@@ -620,16 +623,15 @@ require([
             labels: labels,
             datasets: [{
                 data: data,
-                // backgroundColor: function(item){
-                //     const airline = item.chart.data.labels[item.dataIndex];
-                //     return setChartColor(airline, item.dataIndex);
-                // },
                 backgroundColor: "#00c5ff",
                 borderWidth: "1",
                 borderColor: "00AAFF",
                 datalabels: {
                     labels: {
                         name: {
+                            anchor: "end",
+                            align: "top",
+                            offset: 2,
                             color: "#eee",
                             formatter: function(value, ctx) {
                                 return (
@@ -711,7 +713,7 @@ require([
 
     function getTopMarketPassengers(results) {
         // Get the top markets and their passenger counts
-        const topAirlineCount = 19; // The count of Top Airlines to include
+        const topAirlineCount = 20; // The count of Top Airlines to include
         const minimumPercent = 0; // the minimum percent a value needs to be to be included on chart
         const nameColumn = "origin_market_name";
         const valueColumn = "passengers";
