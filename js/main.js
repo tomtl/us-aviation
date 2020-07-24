@@ -425,9 +425,9 @@ require([
         let label = '';
 
         if (val > 1000000000) {
-            label = Math.sign(val)*((Math.abs(val)/1000000000).toFixed(3)) + 'B';
+            label = Math.sign(val)*((Math.abs(val)/1000000000).toFixed(2)) + 'B';
         } else if (val > 1000000) {
-            label = Math.sign(val)*((Math.abs(val)/1000000).toFixed(3)) + 'M';
+            label = Math.sign(val)*((Math.abs(val)/1000000).toFixed(2)) + 'M';
         } else {
             label = val.toLocaleString();
         }
@@ -639,23 +639,6 @@ require([
                         }
                     }
                 }
-                // datalabels: {
-                //     anchor: 'end',
-                //     offset: 0,
-                //     padding: 0,
-                    // labels: {
-                    //     name: {
-                    //         align: 'end',
-                    //         formatter: function(value, ctx) {
-                    //             return (
-                    //                 formatAirlineName(ctx.chart.data.labels[ctx.dataIndex]) + " "
-                    //                 + formatNumberLabel(value)
-                    //             );
-                    //         },
-                    //         color: '#eee'
-                    //     }
-                    // }
-                // }
             }]
         };
         chart.options = {
@@ -679,6 +662,9 @@ require([
                 xAxes: [{
                     ticks: {
                         // fontColor: "#ff0000"
+                        callback: function(value, index, values){
+                            return formatMarketName(value);
+                        }
                     }
                 }]
             },
@@ -781,6 +767,17 @@ require([
         }
 
         return [labels, data];
+    };
+
+    function formatMarketName(marketName){
+        let formattedName = "";
+        if (marketName.includes("(Metropolitan Area)")) {
+            formattedName = marketName.replace(" (Metropolitan Area)", "");
+        } else {
+            formattedName = marketName;
+        }
+
+        return formattedName;
     };
 })
 
