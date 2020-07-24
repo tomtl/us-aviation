@@ -86,7 +86,7 @@ require([
         }
     });
 
-    const arcadeScript = document.getElementById("routes-arcade").text;
+    // const arcadeScript = document.getElementById("routes-arcade").text;
 
     const routesPopupTemplate = {
         title: "{origin} - {dest}",
@@ -159,6 +159,12 @@ require([
     const airlinePassengerMilesCtx = document.getElementById("airlinePassengerMilesChart");
     let airlinePassengerMilesChart = new Chart(airlinePassengerMilesCtx, { type: "doughnut", data: {} });
     updateAirlinePassengerMilesChart(airlinePassengerMilesChart);
+
+    // Market passenger counts
+    const marketPassengersCtx = document.getElementById("marketPassengersChart");
+    marketPassengersCtx.height = 200;
+    let marketPassengersChart = new Chart(marketPassengersCtx, { type: "bar", data: {}, options: {maintainAspectRatio: false} });
+    updateMarketPassengersChart(marketPassengersChart);
 
     function generateFilter(field, attribute){
         uniqueValues({
@@ -605,6 +611,176 @@ require([
         } else {
             return others[index];
         }
+    };
+
+    function loadBarChart(chart, labels, data){
+        // load and format data for pie chart
+        chart.plugins = [ChartDataLabels];
+        chart.data = {
+            labels: labels,
+            datasets: [{
+                data: data,
+                // backgroundColor: function(item){
+                //     const airline = item.chart.data.labels[item.dataIndex];
+                //     return setChartColor(airline, item.dataIndex);
+                // },
+                backgroundColor: "#00c5ff",
+                borderWidth: "1",
+                borderColor: "00AAFF",
+                datalabels: {
+                    labels: {
+                        name: {
+                            color: "#eee",
+                            formatter: function(value, ctx) {
+                                return (
+                                    formatNumberLabel(value)
+                                );
+                            },
+                        }
+                    }
+                }
+                // datalabels: {
+                //     anchor: 'end',
+                //     offset: 0,
+                //     padding: 0,
+                    // labels: {
+                    //     name: {
+                    //         align: 'end',
+                    //         formatter: function(value, ctx) {
+                    //             return (
+                    //                 formatAirlineName(ctx.chart.data.labels[ctx.dataIndex]) + " "
+                    //                 + formatNumberLabel(value)
+                    //             );
+                    //         },
+                    //         color: '#eee'
+                    //     }
+                    // }
+                // }
+            }]
+        };
+        chart.options = {
+            legend: {
+                display: false,
+            },
+            layout: {
+                padding: {
+                    top: 30,
+                    bottom: 30
+                }
+            },
+            maintainAspectRatio: false,
+            scales: {
+                yAxes: [{
+                    display: false,
+                    ticks: {
+                        min: 0
+                    }
+                }],
+                xAxes: [{
+                    ticks: {
+                        // fontColor: "#ff0000"
+                    }
+                }]
+            },
+            tooltips: {
+                callbacks: {
+                    label: function(tooltipItem, data) {
+                        const label = data.labels[tooltipItem.index];
+                        const value = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+                        return label + ": " + formatNumberLabel(value);
+                    }
+                }
+            }
+        };
+        chart.update();
+    };
+
+    function updateMarketPassengersChart(chart){
+        // update the airline passenger chart when filters change
+        const query = createMarketPassengersQuery(routesLayer);
+    
+        routesLayer.queryFeatures(query).then(function(response){
+            let topMarkets = getTopMarketPassengers(response.features);
+            let [labels, data ] = setupMarketPassengersData(topMarkets);
+
+            loadBarChart(chart, labels, data);
+        });
+    };
+
+    function createMarketPassengersQuery(layer){
+        // Create the query for the airline passenger counts pie chart
+        const query = layer.createQuery();
+        query.outStatistics = [{
+            onStatisticField: "pass_" + filterValues.year,
+            outStatisticFieldName: "passengers",
+            statisticType: "sum"
+        }];
+    
+        let whereStatement = createWhereStatement(filterValues);
+        query.where = whereStatement;
+    
+        query.groupByFieldsForStatistics = ["origin_market_name"];
+        return query;
+    };
+
+    function getTopMarketPassengers(results) {
+        // Get the top markets and their passenger counts
+        const topAirlineCount = 19; // The count of Top Airlines to include
+        const minimumPercent = 0; // the minimum percent a value needs to be to be included on chart
+        const nameColumn = "origin_market_name";
+        const valueColumn = "passengers";
+
+        // parse the data
+        let values = [];
+        results.forEach(parseResults);
+        function parseResults(result){
+            let value = {};
+            value.name = result.attributes[nameColumn];
+            value.value = result.attributes[valueColumn];
+            values.push(value);
+        };
+
+        values.sort(function(a, b) {
+            return b.value  - a.value ;
+        });
+
+        // get the total passengers
+        let totalValue = 0;
+        for (var i=0; i<values.length; i++) {
+            totalValue += values[i].value ;
+        }
+        
+        // get the top airlines plus a number for Others
+        let topValues = [];
+        if (values.length > topAirlineCount) {
+            topValues = values.slice(0, topAirlineCount);
+            let topValuesSum = 0;
+            topValues.forEach(function(entry, index, obj) {
+                if (entry.values < totalValue * (minimumPercent / 100.0)) {
+                    topValues = topValues.slice(0, index);
+                } else {
+                    topValuesSum += entry.value ;
+                }
+            })
+            // topValues.push({name: 'Others', value: totalValue - topValuesSum});
+        } else {
+            topValues = values;
+        }
+        
+        return topValues;
+    };
+
+    function setupMarketPassengersData(topValues) {
+        // setup the data for the chart
+        let labels = [];
+        let data = [];
+
+        for (var i=0; i<topValues.length; i++) {
+            labels.push(topValues[i].name);
+            data.push(topValues[i].value);
+        }
+
+        return [labels, data];
     };
 })
 

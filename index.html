@@ -15,7 +15,7 @@
         <link rel="stylesheet" href="css/style.css">
     </head>
     <body>
-        <script type="text/arcgis-arcade" id="routes-arcade">
+        <!-- <script type="text/arcgis-arcade" id="routes-arcade">
             Console("Running arcade expression");
             var tbl = FeatureSetByName($map, "routesLayer", ["orig", "dest", "unique_carrier_name"], false);
             var origin = $feature["origin"];
@@ -35,7 +35,7 @@
 
             Console(carriers);
             return carriers;
-        </script>
+        </script> -->
 
         <div id="viewDiv"></div>
 
@@ -64,6 +64,10 @@
             <canvas id="airlinePassengersChart"></canvas>
             <h2>Airline Passenger Miles</h2>
             <canvas id="airlinePassengerMilesChart"></canvas>
+        </div>
+
+        <div id="bottomPanel">
+            <canvas id="marketPassengersChart"></canvas>
         </div>
 
         <script type="text/javascript" src="js/main.js"></script>

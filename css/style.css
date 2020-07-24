@@ -11,6 +11,7 @@ body {
     height: 100%;
     left: 300px;
     right: 400px;
+    bottom: 200px;
 }
 
 #leftPanel {
@@ -26,8 +27,16 @@ body {
     position: absolute;
     width: 400px;
     top: 0;
-    bottom: 0;
+    bottom: 200px;
     right: 0;
+}
+
+#bottomPanel {
+    position: absolute;
+    height: 200px;
+    bottom: 0px;
+    left: 300px;
+    right: 0px;
 }
 
 #chart { 
