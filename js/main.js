@@ -168,6 +168,10 @@ require([
     let destMarketPassengersChart = createBarChart("destMarketPassengersChart");
     updateDestMarketPassengersChart(destMarketPassengersChart);
 
+    // Origin Airport passenger chart
+    let originAirportPassengersChart = createBarChart("originAirportPassengersChart");
+    updateOriginAirportPassengersChart(originAirportPassengersChart);
+
     function createBarChart(id){
         const destMarketPassengersCtx = document.getElementById(id);
         destMarketPassengersCtx.height = 200;
@@ -223,6 +227,7 @@ require([
         updateAirlinePassengerMilesChart(airlinePassengerMilesChart);
         updateOriginMarketPassengersChart(originMarketPassengersChart);
         updateDestMarketPassengersChart(destMarketPassengersChart);
+        updateOriginAirportPassengersChart(originAirportPassengersChart);
     };
 
     // Markets filter
@@ -712,6 +717,18 @@ require([
     
         routesLayer.queryFeatures(query).then(function(response){
             let topMarkets = getTopNameValue(response.features, "dest_market_name", "passengers");
+            let [labels, data ] = setupNameValuesData(topMarkets);
+
+            loadBarChart(chart, labels, data);
+        });
+    };
+
+    function updateOriginAirportPassengersChart(chart){
+        // update the airline passenger chart when filters change
+        const query = createPassengerCountsQuery(routesLayer, "origin");
+    
+        routesLayer.queryFeatures(query).then(function(response){
+            let topMarkets = getTopNameValue(response.features, "origin", "passengers");
             let [labels, data ] = setupNameValuesData(topMarkets);
 
             loadBarChart(chart, labels, data);
