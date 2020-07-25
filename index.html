@@ -68,12 +68,13 @@
 
         <div id="bottomPanel">
             <div class="tab">
-                <button class="tablink" onclick="openChart(event, 'marketPassengersChart')">Passengers by Origin Market</button>
-                <button class="tablink" onclick="openChart(event, 'menu1')">Chart 2</button>
+                <button class="tablink" onclick="openChart(event, 'originMarketPassengersChart')">Passengers by Origin Market</button>
+                <button class="tablink" onclick="openChart(event, 'destMarketPassengersChart')">Passengers by Dest. Market</button>
                 <button class="tablink" onclick="openChart(event, 'menu2')">Chart 3</button>
             </div>
 
-            <canvas id="marketPassengersChart" class="tabcontent"></canvas>
+            <canvas id="originMarketPassengersChart" class="tabcontent"></canvas>
+            <canvas id="destMarketPassengersChart" class="tabcontent"></canvas>
             <div id="menu1" class="tabcontent">This is Chart 2</div>
             <div id="menu2" class="tabcontent">This is Chart 3</div>
         </div>
