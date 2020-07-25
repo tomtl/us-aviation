@@ -161,16 +161,20 @@ require([
     updateAirlinePassengerMilesChart(airlinePassengerMilesChart);
 
     // Origin Market passenger counts
-    const originMarketPassengersCtx = document.getElementById("originMarketPassengersChart");
-    originMarketPassengersCtx.height = 200;
-    let originMarketPassengersChart = new Chart(originMarketPassengersCtx, { type: "bar", data: {}, options: {maintainAspectRatio: false} });
+    let originMarketPassengersChart = createBarChart("originMarketPassengersChart")
     updateOriginMarketPassengersChart(originMarketPassengersChart);
 
     // Destination Market Passenger counts
-    const destMarketPassengersCtx = document.getElementById("destMarketPassengersChart");
-    destMarketPassengersCtx.height = 200;
-    let destMarketPassengersChart = new Chart(destMarketPassengersCtx, { type: "bar", data: {}, options: {maintainAspectRatio: false} });
+    let destMarketPassengersChart = createBarChart("destMarketPassengersChart");
     updateDestMarketPassengersChart(destMarketPassengersChart);
+
+    function createBarChart(id){
+        const destMarketPassengersCtx = document.getElementById(id);
+        destMarketPassengersCtx.height = 200;
+        let chart = new Chart(destMarketPassengersCtx, { type: "bar", data: {}, options: {maintainAspectRatio: false} });
+    
+        return chart;
+    };
 
     function generateFilter(field, attribute){
         uniqueValues({
@@ -210,10 +214,15 @@ require([
             // filterRoutesByAirline(selectedAirline);
             filterValues.airline = selectedAirline;
             filterRoutesByAirlineMarket();
-            updateAirlinePassengersChart(airlinePassengersChart);
-            updateAirlinePassengerMilesChart(airlinePassengerMilesChart);
-            updateOriginMarketPassengersChart(originMarketPassengersChart);
+            updateAllCharts();
         }
+    };
+
+    function updateAllCharts(){
+        updateAirlinePassengersChart(airlinePassengersChart);
+        updateAirlinePassengerMilesChart(airlinePassengerMilesChart);
+        updateOriginMarketPassengersChart(originMarketPassengersChart);
+        updateDestMarketPassengersChart(destMarketPassengersChart);
     };
 
     // Markets filter
@@ -224,9 +233,7 @@ require([
             // filterRoutesByMarket(selectedMarket);
             filterValues.market = selectedMarket;
             filterRoutesByAirlineMarket();
-            updateAirlinePassengersChart(airlinePassengersChart);
-            updateAirlinePassengerMilesChart(airlinePassengerMilesChart);
-            updateOriginMarketPassengersChart(originMarketPassengersChart);
+            updateAllCharts();
         }
     };
 
@@ -303,9 +310,7 @@ require([
             marketsLayer.renderer = marketsRenderer;
 
             // update charts
-            updateAirlinePassengersChart(airlinePassengersChart);
-            updateAirlinePassengerMilesChart(airlinePassengerMilesChart);
-            updateOriginMarketPassengersChart(originMarketPassengersChart);
+            updateAllCharts();
         }
         
     };
@@ -691,10 +696,10 @@ require([
 
     function updateOriginMarketPassengersChart(chart){
         // update the airline passenger chart when filters change
-        const query = createOriginMarketPassengersQuery(routesLayer);
+        const query = createPassengerCountsQuery(routesLayer, "origin_market_name");
     
         routesLayer.queryFeatures(query).then(function(response){
-            let topMarkets = getTopOriginMarketPassengers(response.features);
+            let topMarkets = getTopNameValue(response.features, "origin_market_name", "passengers");
             let [labels, data ] = setupNameValuesData(topMarkets);
 
             loadBarChart(chart, labels, data);
@@ -713,23 +718,6 @@ require([
         });
     };
 
-    function createOriginMarketPassengersQuery(layer){
-        // Create the query for the airline passenger counts pie chart
-        const query = layer.createQuery();
-        query.outStatistics = [{
-            onStatisticField: "pass_" + filterValues.year,
-            outStatisticFieldName: "passengers",
-            statisticType: "sum"
-        }];
-    
-        let whereStatement = createWhereStatement(filterValues);
-        query.where = whereStatement;
-    
-        query.groupByFieldsForStatistics = ["origin_market_name"];
-        return query;
-    };
-
-
     function createPassengerCountsQuery(layer, column){
         // Create the query for the airline passenger counts pie chart
         const query = layer.createQuery();
@@ -744,53 +732,6 @@ require([
     
         query.groupByFieldsForStatistics = [column];
         return query;
-    };
-
-    function getTopOriginMarketPassengers(results) {
-        // Get the top markets and their passenger counts
-        const topAirlineCount = 20; // The count of Top Airlines to include
-        const minimumPercent = 0; // the minimum percent a value needs to be to be included on chart
-        const nameColumn = "origin_market_name";
-        const valueColumn = "passengers";
-
-        // parse the data
-        let values = [];
-        results.forEach(parseResults);
-        function parseResults(result){
-            let value = {};
-            value.name = result.attributes[nameColumn];
-            value.value = result.attributes[valueColumn];
-            values.push(value);
-        };
-
-        values.sort(function(a, b) {
-            return b.value  - a.value ;
-        });
-
-        // get the total passengers
-        let totalValue = 0;
-        for (var i=0; i<values.length; i++) {
-            totalValue += values[i].value ;
-        }
-        
-        // get the top airlines plus a number for Others
-        let topValues = [];
-        if (values.length > topAirlineCount) {
-            topValues = values.slice(0, topAirlineCount);
-            let topValuesSum = 0;
-            topValues.forEach(function(entry, index, obj) {
-                if (entry.values < totalValue * (minimumPercent / 100.0)) {
-                    topValues = topValues.slice(0, index);
-                } else {
-                    topValuesSum += entry.value ;
-                }
-            })
-            // topValues.push({name: 'Others', value: totalValue - topValuesSum});
-        } else {
-            topValues = values;
-        }
-        
-        return topValues;
     };
 
     function getTopNameValue(results, nameColumn, valueColumn) {
@@ -885,5 +826,3 @@ function openChart(evt, tabName) {
     document.getElementById(tabName).style.display = "block";
     evt.currentTarget.className += " active";
 };
-
-
