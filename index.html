@@ -67,7 +67,15 @@
         </div>
 
         <div id="bottomPanel">
-            <canvas id="marketPassengersChart"></canvas>
+            <div class="tab">
+                <button class="tablink" onclick="openChart(event, 'marketPassengersChart')">Passengers by Origin Market</button>
+                <button class="tablink" onclick="openChart(event, 'menu1')">Chart 2</button>
+                <button class="tablink" onclick="openChart(event, 'menu2')">Chart 3</button>
+            </div>
+
+            <canvas id="marketPassengersChart" class="tabcontent"></canvas>
+            <div id="menu1" class="tabcontent">This is Chart 2</div>
+            <div id="menu2" class="tabcontent">This is Chart 3</div>
         </div>
 
         <script type="text/javascript" src="js/main.js"></script>

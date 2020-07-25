@@ -93,3 +93,7 @@ select:focus {
 select option {
 	font-weight:normal;
 }
+
+.tabcontent {
+    display: none;
+}
