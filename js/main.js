@@ -176,6 +176,14 @@ require([
     let destAirportPassengersChart = createBarChart("destAirportPassengersChart");
     updateDestAirportPassengersChart(destAirportPassengersChart);
 
+    // Route passengers chart
+    let routePassengersChart = createBarChart("routePassengersChart");
+    updateRoutePassengersChart(routePassengersChart);
+
+    // Market Route passengers chart
+    let marketRoutePassengersChart = createBarChart("marketRoutePassengersChart");
+    updateMarketRoutePassengersChart(marketRoutePassengersChart);
+
     function createBarChart(id){
         const destMarketPassengersCtx = document.getElementById(id);
         destMarketPassengersCtx.height = 200;
@@ -233,6 +241,8 @@ require([
         updateDestMarketPassengersChart(destMarketPassengersChart);
         updateOriginAirportPassengersChart(originAirportPassengersChart);
         updateDestAirportPassengersChart(destAirportPassengersChart);
+        updateRoutePassengersChart(routePassengersChart);
+        updateMarketRoutePassengersChart(marketRoutePassengersChart);
     };
 
     // Markets filter
@@ -752,7 +762,48 @@ require([
         });
     };
 
+    function updateRoutePassengersChart(chart){
+        // update the airline passenger chart when filters change
+        const query = createPassengerCountsQuery(routesLayer, "origin || ' - ' || dest");
+    
+        routesLayer.queryFeatures(query).then(function(response){
+            let topMarkets = getTopNameValue(response.features, "EXPR_1", "passengers");
+            let [labels, data ] = setupNameValuesData(topMarkets);
+
+            loadBarChart(chart, labels, data);
+        });
+    };
+
+    function updateMarketRoutePassengersChart(chart){
+        // update the airline passenger chart when filters change
+        const query = createPassengerCountsQuery(routesLayer, "origin_market_name || ' - ' || dest_market_name");
+    
+        routesLayer.queryFeatures(query).then(function(response){
+            let topMarkets = getTopNameValue(response.features, "EXPR_1", "passengers");
+            let [labels, data ] = setupNameValuesData(topMarkets);
+
+            loadBarChart(chart, labels, data);
+        });
+    };
+
     function createPassengerCountsQuery(layer, column){
+        // Create the query for the airline passenger counts pie chart
+        const query = layer.createQuery();
+        query.outStatistics = [{
+            onStatisticField: "pass_" + filterValues.year,
+            outStatisticFieldName: "passengers",
+            statisticType: "sum"
+        }];
+    
+        let whereStatement = createWhereStatement(filterValues);
+        query.where = whereStatement;
+    
+        query.groupByFieldsForStatistics = [column];
+        query.orderByFields = ["passengers DESC"];
+        return query;
+    };
+
+        function createPassengerCountsQuery(layer, column){
         // Create the query for the airline passenger counts pie chart
         const query = layer.createQuery();
         query.outStatistics = [{
@@ -831,7 +882,7 @@ require([
     function formatMarketName(marketName){
         let formattedName = "";
         if (marketName.includes("(Metropolitan Area)")) {
-            formattedName = marketName.replace(" (Metropolitan Area)", "");
+            formattedName = marketName.replace(" (Metropolitan Area)", "").replace(" (Metropolitan Area)", "");
         } else {
             formattedName = marketName;
         }
@@ -841,6 +892,7 @@ require([
 });
 
 function openChart(evt, tabName) {
+    // Change the bar chart being displayed when button is clicked
     // Declare all variables
     var i, tabContent, tabLinks;
   
