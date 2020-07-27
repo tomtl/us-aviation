@@ -86,7 +86,7 @@ require([
         }
     });
 
-    const arcadeScript = document.getElementById("routes-arcade").text;
+    // const arcadeScript = document.getElementById("routes-arcade").text;
 
     const routesPopupTemplate = {
         title: "{origin} - {dest}",
@@ -160,6 +160,49 @@ require([
     let airlinePassengerMilesChart = new Chart(airlinePassengerMilesCtx, { type: "doughnut", data: {} });
     updateAirlinePassengerMilesChart(airlinePassengerMilesChart);
 
+    // Origin Market passenger counts
+    let originMarketPassengersChart = createBarChart("originMarketPassengersChart")
+    updateOriginMarketPassengersChart(originMarketPassengersChart);
+
+    // Destination Market Passenger counts
+    let destMarketPassengersChart = createBarChart("destMarketPassengersChart");
+    updateDestMarketPassengersChart(destMarketPassengersChart);
+
+    // Origin Airport passenger chart
+    let originAirportPassengersChart = createBarChart("originAirportPassengersChart");
+    updateOriginAirportPassengersChart(originAirportPassengersChart);
+
+    // Dest Airport passenger chart
+    let destAirportPassengersChart = createBarChart("destAirportPassengersChart");
+    updateDestAirportPassengersChart(destAirportPassengersChart);
+
+    // Route passengers chart
+    let routePassengersChart = createBarChart("routePassengersChart");
+    updateRoutePassengersChart(routePassengersChart);
+
+    // Market Route passengers chart
+    let marketRoutePassengersChart = createBarChart("marketRoutePassengersChart");
+    updateMarketRoutePassengersChart(marketRoutePassengersChart);
+
+    // Hide all the bar charts except the first one
+    hideInactiveBarCharts();
+    function hideInactiveBarCharts(){
+        const tabContent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabContent.length; i++) {
+            if (i != 0) {
+                tabContent[i].style.display = "none";
+            } 
+        };
+    };
+
+    function createBarChart(id){
+        const destMarketPassengersCtx = document.getElementById(id);
+        destMarketPassengersCtx.height = 200;
+        let chart = new Chart(destMarketPassengersCtx, { type: "bar", data: {}, options: {maintainAspectRatio: false} });
+    
+        return chart;
+    };
+
     function generateFilter(field, attribute){
         uniqueValues({
             layer: routesLayer,
@@ -198,9 +241,19 @@ require([
             // filterRoutesByAirline(selectedAirline);
             filterValues.airline = selectedAirline;
             filterRoutesByAirlineMarket();
-            updateAirlinePassengersChart(airlinePassengersChart);
-            updateAirlinePassengerMilesChart(airlinePassengerMilesChart);
+            updateAllCharts();
         }
+    };
+
+    function updateAllCharts(){
+        updateAirlinePassengersChart(airlinePassengersChart);
+        updateAirlinePassengerMilesChart(airlinePassengerMilesChart);
+        updateOriginMarketPassengersChart(originMarketPassengersChart);
+        updateDestMarketPassengersChart(destMarketPassengersChart);
+        updateOriginAirportPassengersChart(originAirportPassengersChart);
+        updateDestAirportPassengersChart(destAirportPassengersChart);
+        updateRoutePassengersChart(routePassengersChart);
+        updateMarketRoutePassengersChart(marketRoutePassengersChart);
     };
 
     // Markets filter
@@ -211,8 +264,7 @@ require([
             // filterRoutesByMarket(selectedMarket);
             filterValues.market = selectedMarket;
             filterRoutesByAirlineMarket();
-            updateAirlinePassengersChart(airlinePassengersChart);
-            updateAirlinePassengerMilesChart(airlinePassengerMilesChart);
+            updateAllCharts();
         }
     };
 
@@ -289,8 +341,7 @@ require([
             marketsLayer.renderer = marketsRenderer;
 
             // update charts
-            updateAirlinePassengersChart(airlinePassengersChart);
-            updateAirlinePassengerMilesChart(airlinePassengerMilesChart);
+            updateAllCharts();
         }
         
     };
@@ -338,10 +389,10 @@ require([
                 borderWidth: "1",
                 datalabels: {
                     anchor: 'end',
-                    offset: 0,
                     padding: 0,
                     labels: {
                         name: {
+                            anchor: "end",
                             align: 'end',
                             formatter: function(value, ctx) {
                                 return (
@@ -419,9 +470,9 @@ require([
         let label = '';
 
         if (val > 1000000000) {
-            label = Math.sign(val)*((Math.abs(val)/1000000000).toFixed(3)) + 'B';
+            label = Math.sign(val)*((Math.abs(val)/1000000000).toFixed(2)) + 'B';
         } else if (val > 1000000) {
-            label = Math.sign(val)*((Math.abs(val)/1000000).toFixed(3)) + 'M';
+            label = Math.sign(val)*((Math.abs(val)/1000000).toFixed(2)) + 'M';
         } else {
             label = val.toLocaleString();
         }
@@ -606,6 +657,269 @@ require([
             return others[index];
         }
     };
-})
 
+    function loadBarChart(chart, labels, data){
+        // load and format data for pie chart
+        chart.plugins = [ChartDataLabels];
+        chart.data = {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: "#00c5ff",
+                borderWidth: "1",
+                borderColor: "00AAFF",
+                datalabels: {
+                    labels: {
+                        name: {
+                            anchor: "end",
+                            align: "top",
+                            offset: 2,
+                            color: "#eee",
+                            formatter: function(value, ctx) {
+                                return (
+                                    formatNumberLabel(value)
+                                );
+                            },
+                        }
+                    }
+                }
+            }]
+        };
+        chart.options = {
+            legend: {
+                display: false,
+            },
+            layout: {
+                padding: {
+                    top: 30,
+                    bottom: 30
+                }
+            },
+            maintainAspectRatio: false,
+            scales: {
+                yAxes: [{
+                    display: false,
+                    ticks: {
+                        min: 0
+                    }
+                }],
+                xAxes: [{
+                    ticks: {
+                        // fontColor: "#ff0000"
+                        callback: function(value, index, values){
+                            return formatMarketName(value);
+                        }
+                    }
+                }]
+            },
+            tooltips: {
+                callbacks: {
+                    label: function(tooltipItem, data) {
+                        const label = data.labels[tooltipItem.index];
+                        const value = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+                        return label + ": " + formatNumberLabel(value);
+                    }
+                }
+            }
+        };
+        chart.update();
+    };
 
+    function updateOriginMarketPassengersChart(chart){
+        // update the airline passenger chart when filters change
+        const query = createPassengerCountsQuery(routesLayer, "origin_market_name");
+    
+        routesLayer.queryFeatures(query).then(function(response){
+            let topMarkets = getTopNameValue(response.features, "origin_market_name", "passengers");
+            let [labels, data ] = setupNameValuesData(topMarkets);
+
+            loadBarChart(chart, labels, data);
+        });
+    };
+
+    function updateDestMarketPassengersChart(chart){
+        // update the airline passenger chart when filters change
+        const query = createPassengerCountsQuery(routesLayer, "dest_market_name");
+    
+        routesLayer.queryFeatures(query).then(function(response){
+            let topMarkets = getTopNameValue(response.features, "dest_market_name", "passengers");
+            let [labels, data ] = setupNameValuesData(topMarkets);
+
+            loadBarChart(chart, labels, data);
+        });
+    };
+
+    function updateOriginAirportPassengersChart(chart){
+        // update the airline passenger chart when filters change
+        const query = createPassengerCountsQuery(routesLayer, "origin");
+    
+        routesLayer.queryFeatures(query).then(function(response){
+            let topMarkets = getTopNameValue(response.features, "origin", "passengers");
+            let [labels, data ] = setupNameValuesData(topMarkets);
+
+            loadBarChart(chart, labels, data);
+        });
+    };
+
+    function updateDestAirportPassengersChart(chart){
+        // update the airline passenger chart when filters change
+        const query = createPassengerCountsQuery(routesLayer, "dest");
+    
+        routesLayer.queryFeatures(query).then(function(response){
+            let topMarkets = getTopNameValue(response.features, "dest", "passengers");
+            let [labels, data ] = setupNameValuesData(topMarkets);
+
+            loadBarChart(chart, labels, data);
+        });
+    };
+
+    function updateRoutePassengersChart(chart){
+        // update the airline passenger chart when filters change
+        const query = createPassengerCountsQuery(routesLayer, "origin || ' - ' || dest");
+    
+        routesLayer.queryFeatures(query).then(function(response){
+            let topMarkets = getTopNameValue(response.features, "EXPR_1", "passengers");
+            let [labels, data ] = setupNameValuesData(topMarkets);
+
+            loadBarChart(chart, labels, data);
+        });
+    };
+
+    function updateMarketRoutePassengersChart(chart){
+        // update the airline passenger chart when filters change
+        const query = createPassengerCountsQuery(routesLayer, "origin_market_name || ' - ' || dest_market_name");
+    
+        routesLayer.queryFeatures(query).then(function(response){
+            let topMarkets = getTopNameValue(response.features, "EXPR_1", "passengers");
+            let [labels, data ] = setupNameValuesData(topMarkets);
+
+            loadBarChart(chart, labels, data);
+        });
+    };
+
+    function createPassengerCountsQuery(layer, column){
+        // Create the query for the airline passenger counts pie chart
+        const query = layer.createQuery();
+        query.outStatistics = [{
+            onStatisticField: "pass_" + filterValues.year,
+            outStatisticFieldName: "passengers",
+            statisticType: "sum"
+        }];
+    
+        let whereStatement = createWhereStatement(filterValues);
+        query.where = whereStatement;
+    
+        query.groupByFieldsForStatistics = [column];
+        query.orderByFields = ["passengers DESC"];
+        return query;
+    };
+
+        function createPassengerCountsQuery(layer, column){
+        // Create the query for the airline passenger counts pie chart
+        const query = layer.createQuery();
+        query.outStatistics = [{
+            onStatisticField: "pass_" + filterValues.year,
+            outStatisticFieldName: "passengers",
+            statisticType: "sum"
+        }];
+    
+        let whereStatement = createWhereStatement(filterValues);
+        query.where = whereStatement;
+    
+        query.groupByFieldsForStatistics = [column];
+        return query;
+    };
+
+    function getTopNameValue(results, nameColumn, valueColumn) {
+        // Get the top markets and their passenger counts
+        const topCount = 20; // The count of Top Airlines to include
+        const minimumPercent = 0; // the minimum percent a value needs to be to be included on chart
+        // const nameColumn = "origin_market_name";
+        // const valueColumn = "passengers";
+
+        // parse the data
+        let values = [];
+        results.forEach(parseResults);
+        function parseResults(result){
+            let value = {};
+            value.name = result.attributes[nameColumn];
+            value.value = result.attributes[valueColumn];
+            values.push(value);
+        };
+
+        values.sort(function(a, b) {
+            return b.value  - a.value ;
+        });
+
+        // get the total passengers
+        let totalValue = 0;
+        for (var i=0; i<values.length; i++) {
+            totalValue += values[i].value ;
+        }
+        
+        // get the top airlines plus a number for Others
+        let topValues = [];
+        if (values.length > topCount) {
+            topValues = values.slice(0, topCount);
+            let topValuesSum = 0;
+            topValues.forEach(function(entry, index, obj) {
+                if (entry.values < totalValue * (minimumPercent / 100.0)) {
+                    topValues = topValues.slice(0, index);
+                } else {
+                    topValuesSum += entry.value ;
+                }
+            })
+            // topValues.push({name: 'Others', value: totalValue - topValuesSum});
+        } else {
+            topValues = values;
+        }
+        
+        return topValues;
+    };
+
+    function setupNameValuesData(topValues) {
+        // setup the data for the chart
+        let labels = [];
+        let data = [];
+
+        for (var i=0; i<topValues.length; i++) {
+            labels.push(topValues[i].name);
+            data.push(topValues[i].value);
+        }
+
+        return [labels, data];
+    };
+
+    function formatMarketName(marketName){
+        let formattedName = "";
+        if (marketName.includes("(Metropolitan Area)")) {
+            formattedName = marketName.replace(" (Metropolitan Area)", "").replace(" (Metropolitan Area)", "");
+        } else {
+            formattedName = marketName;
+        }
+
+        return formattedName;
+    };
+});
+
+function openChart(evt, tabName) {
+    // Change the bar chart being displayed when button is clicked
+    // Declare all variables
+    var i, tabContent, tabLinks;
+  
+    // Get all elements with class="tabcontent" and hide them
+    tabContent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabContent.length; i++) {
+        tabContent[i].style.display = "none";
+    }
+  
+    // Get all elements with class="tablinks" and remove the class "active"
+    tabLinks = document.getElementsByClassName("tablink");
+    for (i = 0; i < tabLinks.length; i++) {
+        tabLinks[i].className = tabLinks[i].className.replace(" active", "");
+    }
+  
+    // Show the current tab, and add an "active" class to the button that opened the tab
+    document.getElementById(tabName).style.display = "block";
+    evt.currentTarget.className += " active";
+};

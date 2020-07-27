@@ -15,7 +15,7 @@
         <link rel="stylesheet" href="css/style.css">
     </head>
     <body>
-        <script type="text/arcgis-arcade" id="routes-arcade">
+        <!-- <script type="text/arcgis-arcade" id="routes-arcade">
             Console("Running arcade expression");
             var tbl = FeatureSetByName($map, "routesLayer", ["orig", "dest", "unique_carrier_name"], false);
             var origin = $feature["origin"];
@@ -35,7 +35,7 @@
 
             Console(carriers);
             return carriers;
-        </script>
+        </script> -->
 
         <div id="viewDiv"></div>
 
@@ -64,6 +64,26 @@
             <canvas id="airlinePassengersChart"></canvas>
             <h2>Airline Passenger Miles</h2>
             <canvas id="airlinePassengerMilesChart"></canvas>
+        </div>
+
+        <div id="bottomPanel">
+
+            <div class="tab">
+                <button class="tablink active" onclick="openChart(event, 'originMarketPassengersChart')">Origin Market Passengers</button>
+                <button class="tablink" onclick="openChart(event, 'destMarketPassengersChart')">Destination Market Passengers</button>
+                <button class="tablink" onclick="openChart(event, 'originAirportPassengersChart')">Origin Airport Passengers</button>
+                <button class="tablink" onclick="openChart(event, 'destAirportPassengersChart')">Destination Airport Passengers</button>
+                <button class="tablink" onclick="openChart(event, 'routePassengersChart')">Airport to Airport Passengers</button>
+                <button class="tablink" onclick="openChart(event, 'marketRoutePassengersChart')">Market to Market Passengers</button>
+
+            </div>
+
+            <canvas id="originMarketPassengersChart" class="tabcontent"></canvas>
+            <canvas id="destMarketPassengersChart" class="tabcontent"></canvas>
+            <canvas id="originAirportPassengersChart" class="tabcontent"></canvas>
+            <canvas id="destAirportPassengersChart" class="tabcontent"></canvas>
+            <canvas id="routePassengersChart" class="tabcontent"></canvas>
+            <canvas id="marketRoutePassengersChart" class="tabcontent"></canvas>
         </div>
 
         <script type="text/javascript" src="js/main.js"></script>
