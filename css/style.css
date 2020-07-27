@@ -1,10 +1,25 @@
+@import url('https://fonts.googleapis.com/css?family=Open+Sans&display=swap');
+
+@font-face {
+    font-family: 'SkyFont';
+    src: url('../lib/Skyfont/Skyfont.otf'); /* IE9 Compat Modes */
+    src: url('../lib/Skyfont/Skyfont.otf?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+  }
+
 html,
 body {
     margin: 0;
     padding: 0;
     background-color: #00081a;
     color: #ccc;
+    font-family: 'Open Sans';
 }
+
+/* h2 {
+    font-family: 'SkyFont';
+    color: #fff;
+    font-size: 40px;
+} */
 
 #viewDiv {
     position: absolute;
@@ -14,11 +29,16 @@ body {
     bottom: 200px;
 }
 
+.esri-attribution {
+    color: white;
+    background-color: rgba(255, 255, 255, 0);
+}
+
 #leftPanel {
     position: absolute;
     width: 300px;
     top: 0;
-    bottom: 0;
+    bottom: 200px;
     left: 1%;
     
 }
@@ -29,13 +49,14 @@ body {
     top: 0;
     bottom: 200px;
     right: 0;
+    overflow: scroll;
 }
 
 #bottomPanel {
     position: absolute;
     height: 200px;
     bottom: 0px;
-    left: 300px;
+    left: 0px;
     right: 0px;
 }
 
@@ -94,6 +115,28 @@ select option {
 	font-weight:normal;
 }
 
+.tab {
+    padding-top: 10px;
+}
 .tabcontent {
     display: none;
+    border-top: 1px solid white;
+}
+
+button.tablink {
+    border-top: 1px solid white;
+    border-left: 1px solid white;
+    border-right: 1px solid white;
+    border-bottom: none;
+    border-top-left-radius: .5em;
+    border-top-right-radius: .5em;
+    background-color: #00123e;
+    height: 3em;
+    color: #ccc
+}
+
+button.tablink.active {
+    color: #fff;
+    background-color: #0093BF;
+    font-weight: bold;
 }

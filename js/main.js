@@ -184,6 +184,17 @@ require([
     let marketRoutePassengersChart = createBarChart("marketRoutePassengersChart");
     updateMarketRoutePassengersChart(marketRoutePassengersChart);
 
+    // Hide all the bar charts except the first one
+    hideInactiveBarCharts();
+    function hideInactiveBarCharts(){
+        const tabContent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabContent.length; i++) {
+            if (i != 0) {
+                tabContent[i].style.display = "none";
+            } 
+        };
+    };
+
     function createBarChart(id){
         const destMarketPassengersCtx = document.getElementById(id);
         destMarketPassengersCtx.height = 200;
@@ -903,7 +914,7 @@ function openChart(evt, tabName) {
     }
   
     // Get all elements with class="tablinks" and remove the class "active"
-    tabLinks = document.getElementsByClassName("tab-ink");
+    tabLinks = document.getElementsByClassName("tablink");
     for (i = 0; i < tabLinks.length; i++) {
         tabLinks[i].className = tabLinks[i].className.replace(" active", "");
     }
