@@ -227,15 +227,15 @@ require([
 
             // get user selection from filter dropdown
             if (attribute == "airlines") {
-                filterMenu.addEventListener("click", filterByAirline)
+                filterMenu.addEventListener("change", filterByAirline)
             } else if (attribute == "markets") {
-                filterMenu.addEventListener("click", filterByMarket)
+                filterMenu.addEventListener("change", filterByMarket)
             }
         });
     };
 
     function filterByAirline(event) {
-        const selectedAirline = event.target.getAttribute("value");
+        const selectedAirline = event.target.value;
         
         if (selectedAirline) {
             // filterRoutesByAirline(selectedAirline);
@@ -258,7 +258,7 @@ require([
 
     // Markets filter
     function filterByMarket(event) {
-        const selectedMarket = event.target.getAttribute("value");
+        const selectedMarket = event.target.value;
 
         if (selectedMarket) {
             // filterRoutesByMarket(selectedMarket);
@@ -322,10 +322,10 @@ require([
 
     // Year
     const yearMenu = document.getElementById("yearSelector");
-    yearMenu.addEventListener("click", changeYear);
+    yearMenu.addEventListener("change", changeYear);
 
     function changeYear(event){
-        const selectedYear = event.target.getAttribute("value");
+        const selectedYear = event.target.value;
         if (selectedYear) {
             filterValues.year = selectedYear;
 
@@ -834,8 +834,6 @@ require([
         // Get the top markets and their passenger counts
         const topCount = 20; // The count of Top Airlines to include
         const minimumPercent = 0; // the minimum percent a value needs to be to be included on chart
-        // const nameColumn = "origin_market_name";
-        // const valueColumn = "passengers";
 
         // parse the data
         let values = [];
