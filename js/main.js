@@ -17,7 +17,10 @@ require([
 ) {
     let filterValues = {
         airline: "ALL AIRLINES",
-        market: "ALL MARKETS",
+        originMarket: "ALL ORIGIN MARKETS",
+        originAirport: "ALL ORIGIN AIRPORTS",
+        destMarket: "ALL DESTINATION MARKETS",
+        destAirport: "ALL DESTINATION AIRPORTS",
         year: "2019"
     };
 
@@ -147,7 +150,10 @@ require([
     // airlines filter
     // list of airlines
     watchUtils.whenFalseOnce(view, "updating", generateFilter("unique_carrier_name", "airlines"));
-    watchUtils.whenFalseOnce(view, "updating", generateFilter("origin_market_name", "markets"));
+    watchUtils.whenFalseOnce(view, "updating", generateFilter("origin_market_name", "originMarkets"));
+    watchUtils.whenFalseOnce(view, "updating", generateFilter("origin", "originAirports"));
+    watchUtils.whenFalseOnce(view, "updating", generateFilter("dest_market_name", "destMarkets"));
+    watchUtils.whenFalseOnce(view, "updating", generateFilter("dest", "destAirports"));
 
     // Create the chart
     // Airline Passengers pie chart
@@ -204,15 +210,31 @@ require([
     };
 
     function generateFilter(field, attribute){
-        uniqueValues({
-            layer: routesLayer,
-            field: field
-        }).then(function(response){
-            var infos = response.uniqueValueInfos;
+        let groupByField = field;
+        if (field == "origin") {
+            groupByField = "origin || ' - ' || origin_airport_name";
+        } else if (field == "dest") {
+            groupByField = "dest || ' - ' || dest_airport_name";
+        }
+
+        const query = routesLayer.createQuery();
+        query.outStatistics = {
+            onStatisticField: "pass_" + filterValues.year,
+            outStatisticFieldName: "passengers",
+            statisticType: "sum"
+        };
+        query.groupByFieldsForStatistics = groupByField;
+        query.orderByFields = groupByField;
+
+        routesLayer.queryFeatures(query)
+        .then(function(response){
+            var infos = response.features;
 
             var names = [];
             infos.forEach(function(info){
-                names.push(info.value);
+                let columnName = field;
+                if (field == 'origin' || field == 'dest') { columnName = 'EXPR_1'; }
+                names.push(info.attributes[columnName]);
             });
 
             names.sort()
@@ -228,8 +250,14 @@ require([
             // get user selection from filter dropdown
             if (attribute == "airlines") {
                 filterMenu.addEventListener("change", filterByAirline)
-            } else if (attribute == "markets") {
-                filterMenu.addEventListener("change", filterByMarket)
+            } else if (attribute == "originMarkets") {
+                filterMenu.addEventListener("change", filterByOriginMarket)
+            } else if (attribute == "originAirports") {
+                filterMenu.addEventListener("change", filterByOriginAirport)
+            } else if (attribute == "destMarkets") {
+                filterMenu.addEventListener("change", filterByDestMarket)
+            } else if (attribute == "destAirports") {
+                filterMenu.addEventListener("change", filterByDestAirport)
             }
         });
     };
@@ -238,7 +266,6 @@ require([
         const selectedAirline = event.target.value;
         
         if (selectedAirline) {
-            // filterRoutesByAirline(selectedAirline);
             filterValues.airline = selectedAirline;
             filterRoutesByAirlineMarket();
             updateAllCharts();
@@ -257,12 +284,41 @@ require([
     };
 
     // Markets filter
-    function filterByMarket(event) {
+    function filterByOriginMarket(event) {
         const selectedMarket = event.target.value;
 
         if (selectedMarket) {
-            // filterRoutesByMarket(selectedMarket);
-            filterValues.market = selectedMarket;
+            filterValues.originMarket = selectedMarket;
+            filterRoutesByAirlineMarket();
+            updateAllCharts();
+        }
+    };
+
+    function filterByOriginAirport(event) {
+        const selectedAirport = event.target.value.split(" - ")[0];
+
+        if (selectedAirport) {
+            filterValues.originAirport = selectedAirport;
+            filterRoutesByAirlineMarket();
+            updateAllCharts();
+        }
+    };
+
+    function filterByDestMarket(event) {
+        const selectedMarket = event.target.value;
+
+        if (selectedMarket) {
+            filterValues.destMarket = selectedMarket;
+            filterRoutesByAirlineMarket();
+            updateAllCharts();
+        }
+    };
+
+    function filterByDestAirport(event) {
+        const selectedAirport = event.target.value.split(" - ")[0];
+
+        if (selectedAirport) {
+            filterValues.destAirport = selectedAirport;
             filterRoutesByAirlineMarket();
             updateAllCharts();
         }
@@ -275,17 +331,47 @@ require([
 
     function createWhereStatement(filters) {
         let airlineName = filters.airline;
-        let marketName = filters.market;
+        let originMarketName = filters.originMarket;
+        let originAirport = filters.originAirport;
+        let destMarketName = filters.destMarket;
+        let destAirport = filters.destAirport;
         let whereStatement = "";
 
-        if (airlineName == 'ALL AIRLINES' && marketName == 'ALL MARKETS') {
-            whereStatement = null;
-        } else if (airlineName == 'ALL AIRLINES') {
-            whereStatement = `origin_market_name = '${marketName}'`;
-        } else if (marketName == 'ALL MARKETS') {
+
+        if (airlineName != "ALL AIRLINES") {
             whereStatement = `unique_carrier_name = '${airlineName}'`;
-        } else {
-            whereStatement = `unique_carrier_name = '${airlineName}' AND origin_market_name = '${marketName}'`;
+        }
+
+        if (originMarketName != "ALL ORIGIN MARKETS") {
+            if (whereStatement.length == 0) {
+                whereStatement = `origin_market_name = '${originMarketName}'`;
+            } else {
+                whereStatement += ` AND origin_market_name = '${originMarketName}'`;
+            }
+        }
+
+        if (originAirport != "ALL ORIGIN AIRPORTS") {
+            if (whereStatement.length == 0) {
+                whereStatement = `origin = '${originAirport}'`;
+            } else {
+                whereStatement += ` AND origin = '${originAirport}'`;
+            }
+        }
+
+        if (destMarketName != "ALL DESTINATION MARKETS") {
+            if (whereStatement.length == 0) {
+                whereStatement = `dest_market_name = '${destMarketName}'`;
+            } else {
+                whereStatement += ` AND dest_market_name = '${destMarketName}'`;
+            }
+        }
+
+        if (destAirport != "ALL DESTINATION AIRPORTS") {
+            if (whereStatement.length == 0) {
+                whereStatement = `dest = '${destAirport}'`;
+            } else {
+                whereStatement += ` AND dest = '${destAirport}'`;
+            }
         }
 
         return whereStatement;
@@ -298,6 +384,7 @@ require([
 
         // include ALL AIRLINES option
         allOption = "ALL " + id.toUpperCase();
+        allOption = allOption.replace("ORIGIN", "ORIGIN ").replace("DEST", "DESTINATION ");
         values.unshift(allOption);
 
         for (const val of values) {
@@ -691,8 +778,10 @@ require([
             },
             layout: {
                 padding: {
-                    top: 30,
-                    bottom: 30
+                    top: 20,
+                    bottom: 10,
+                    left: 10,
+                    right: 10
                 }
             },
             maintainAspectRatio: false,
@@ -776,6 +865,7 @@ require([
     function updateRoutePassengersChart(chart){
         // update the airline passenger chart when filters change
         const query = createPassengerCountsQuery(routesLayer, "origin || ' - ' || dest");
+        query.maxRecordCountFactor = 5; // Theres 8781 responses but service max allowed is 2000, so this increases max allowed to 10,000
     
         routesLayer.queryFeatures(query).then(function(response){
             let topMarkets = getTopNameValue(response.features, "EXPR_1", "passengers");
@@ -788,7 +878,8 @@ require([
     function updateMarketRoutePassengersChart(chart){
         // update the airline passenger chart when filters change
         const query = createPassengerCountsQuery(routesLayer, "origin_market_name || ' - ' || dest_market_name");
-    
+        query.maxRecordCountFactor = 5;  // Theres 6972 responses but service max allowed is 2000, so this increases max allowed to 10,000
+
         routesLayer.queryFeatures(query).then(function(response){
             let topMarkets = getTopNameValue(response.features, "EXPR_1", "passengers");
             let [labels, data ] = setupNameValuesData(topMarkets);
