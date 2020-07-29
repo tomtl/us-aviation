@@ -863,6 +863,7 @@ require([
     function updateRoutePassengersChart(chart){
         // update the airline passenger chart when filters change
         const query = createPassengerCountsQuery(routesLayer, "origin || ' - ' || dest");
+        query.maxRecordCountFactor = 5; // Theres 8781 responses but service max allowed is 2000, so this increases max allowed to 10,000
     
         routesLayer.queryFeatures(query).then(function(response){
             let topMarkets = getTopNameValue(response.features, "EXPR_1", "passengers");
@@ -875,7 +876,8 @@ require([
     function updateMarketRoutePassengersChart(chart){
         // update the airline passenger chart when filters change
         const query = createPassengerCountsQuery(routesLayer, "origin_market_name || ' - ' || dest_market_name");
-    
+        query.maxRecordCountFactor = 5;  // Theres 6972 responses but service max allowed is 2000, so this increases max allowed to 10,000
+
         routesLayer.queryFeatures(query).then(function(response){
             let topMarkets = getTopNameValue(response.features, "EXPR_1", "passengers");
             let [labels, data ] = setupNameValuesData(topMarkets);
