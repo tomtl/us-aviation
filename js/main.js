@@ -17,7 +17,8 @@ require([
 ) {
     let filterValues = {
         airline: "ALL AIRLINES",
-        market: "ALL MARKETS",
+        originMarket: "ALL ORIGIN MARKETS",
+        originAirport: "ALL ORIGIN AIRPORTS",
         year: "2019"
     };
 
@@ -147,7 +148,8 @@ require([
     // airlines filter
     // list of airlines
     watchUtils.whenFalseOnce(view, "updating", generateFilter("unique_carrier_name", "airlines"));
-    watchUtils.whenFalseOnce(view, "updating", generateFilter("origin_market_name", "markets"));
+    watchUtils.whenFalseOnce(view, "updating", generateFilter("origin_market_name", "originMarkets"));
+    watchUtils.whenFalseOnce(view, "updating", generateFilter("origin", "originAirports"));
 
     // Create the chart
     // Airline Passengers pie chart
@@ -204,15 +206,29 @@ require([
     };
 
     function generateFilter(field, attribute){
-        uniqueValues({
-            layer: routesLayer,
-            field: field
-        }).then(function(response){
-            var infos = response.uniqueValueInfos;
+        let groupByField = field;
+        if (field == "origin") {
+            groupByField = "origin || ' - ' || origin_airport_name";
+        }
+
+        const query = routesLayer.createQuery();
+        query.outStatistics = {
+            onStatisticField: "pass_" + filterValues.year,
+            outStatisticFieldName: "passengers",
+            statisticType: "sum"
+        };
+        query.groupByFieldsForStatistics = groupByField;
+        query.orderByFields = groupByField;
+
+        routesLayer.queryFeatures(query)
+        .then(function(response){
+            var infos = response.features;
 
             var names = [];
             infos.forEach(function(info){
-                names.push(info.value);
+                let columnName = field;
+                if (field == 'origin') { columnName = 'EXPR_1'; }
+                names.push(info.attributes[columnName]);
             });
 
             names.sort()
@@ -228,8 +244,10 @@ require([
             // get user selection from filter dropdown
             if (attribute == "airlines") {
                 filterMenu.addEventListener("change", filterByAirline)
-            } else if (attribute == "markets") {
-                filterMenu.addEventListener("change", filterByMarket)
+            } else if (attribute == "originMarkets") {
+                filterMenu.addEventListener("change", filterByOriginMarket)
+            } else if (attribute == "originAirports") {
+                filterMenu.addEventListener("change", filterByOriginAirport)
             }
         });
     };
@@ -238,7 +256,6 @@ require([
         const selectedAirline = event.target.value;
         
         if (selectedAirline) {
-            // filterRoutesByAirline(selectedAirline);
             filterValues.airline = selectedAirline;
             filterRoutesByAirlineMarket();
             updateAllCharts();
@@ -257,12 +274,21 @@ require([
     };
 
     // Markets filter
-    function filterByMarket(event) {
+    function filterByOriginMarket(event) {
         const selectedMarket = event.target.value;
 
         if (selectedMarket) {
-            // filterRoutesByMarket(selectedMarket);
-            filterValues.market = selectedMarket;
+            filterValues.originMarket = selectedMarket;
+            filterRoutesByAirlineMarket();
+            updateAllCharts();
+        }
+    };
+
+    function filterByOriginAirport(event) {
+        const selectedAirport = event.target.value.split(" - ")[0];
+
+        if (selectedAirport) {
+            filterValues.originAirport = selectedAirport;
             filterRoutesByAirlineMarket();
             updateAllCharts();
         }
@@ -275,17 +301,29 @@ require([
 
     function createWhereStatement(filters) {
         let airlineName = filters.airline;
-        let marketName = filters.market;
+        let originMarketName = filters.originMarket;
+        let originAirport = filters.originAirport;
         let whereStatement = "";
 
-        if (airlineName == 'ALL AIRLINES' && marketName == 'ALL MARKETS') {
-            whereStatement = null;
-        } else if (airlineName == 'ALL AIRLINES') {
-            whereStatement = `origin_market_name = '${marketName}'`;
-        } else if (marketName == 'ALL MARKETS') {
+
+        if (airlineName != "ALL AIRLINES") {
             whereStatement = `unique_carrier_name = '${airlineName}'`;
-        } else {
-            whereStatement = `unique_carrier_name = '${airlineName}' AND origin_market_name = '${marketName}'`;
+        }
+
+        if (originMarketName != "ALL ORIGIN MARKETS") {
+            if (whereStatement.length == 0) {
+                whereStatement = `origin_market_name = '${originMarketName}'`;
+            } else {
+                whereStatement += ` AND origin_market_name = '${originMarketName}'`;
+            }
+        }
+
+        if (originAirport != "ALL ORIGIN AIRPORTS") {
+            if (whereStatement.length == 0) {
+                whereStatement = `origin = '${originAirport}'`;
+            } else {
+                whereStatement += ` AND origin = '${originAirport}'`;
+            }
         }
 
         return whereStatement;
@@ -298,6 +336,7 @@ require([
 
         // include ALL AIRLINES option
         allOption = "ALL " + id.toUpperCase();
+        allOption = allOption.replace("ORIGIN", "ORIGIN ").replace("DEST", "DEST. ");
         values.unshift(allOption);
 
         for (const val of values) {
