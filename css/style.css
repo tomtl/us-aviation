@@ -26,7 +26,7 @@ body {
     top: 0px;
     left: 300px;
     right: 400px;
-    bottom: 200px;
+    bottom: 235px;
 }
 
 .esri-attribution {
@@ -38,7 +38,7 @@ body {
     position: absolute;
     width: 300px;
     top: 0;
-    bottom: 200px;
+    bottom: 235px;
     left: 1%;
     
 }
@@ -47,17 +47,21 @@ body {
     position: absolute;
     width: 400px;
     top: 0;
-    bottom: 200px;
+    bottom: 235px;
     right: 0;
     overflow: scroll;
 }
 
 #bottomPanel {
     position: absolute;
-    height: 200px;
+    height: 235px;
     bottom: 0px;
     left: 0px;
     right: 0px;
+}
+
+#barCharts {
+    height: 200px;
 }
 
 #chart { 
@@ -116,7 +120,7 @@ select option {
 }
 
 .tab {
-    padding-top: 10px;
+    padding-top: 5px;
 }
 .tabcontent {
     display: none;
@@ -131,7 +135,7 @@ button.tablink {
     border-top-left-radius: .5em;
     border-top-right-radius: .5em;
     background-color: #00123e;
-    height: 36px;
+    height: 34px;
     color: #ccc
 }
 

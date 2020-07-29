@@ -778,8 +778,10 @@ require([
             },
             layout: {
                 padding: {
-                    top: 30,
-                    bottom: 30
+                    top: 20,
+                    bottom: 10,
+                    left: 10,
+                    right: 10
                 }
             },
             maintainAspectRatio: false,

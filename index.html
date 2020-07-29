@@ -84,12 +84,14 @@
                 <button class="tablink" onclick="openChart(event, 'routePassengersChart')">Airport to Airport Passengers</button>
             </div>
 
-            <canvas id="originMarketPassengersChart" class="tabcontent"></canvas>
-            <canvas id="destMarketPassengersChart" class="tabcontent"></canvas>
-            <canvas id="originAirportPassengersChart" class="tabcontent"></canvas>
-            <canvas id="destAirportPassengersChart" class="tabcontent"></canvas>
-            <canvas id="marketRoutePassengersChart" class="tabcontent"></canvas>
-            <canvas id="routePassengersChart" class="tabcontent"></canvas>
+            <div id="barCharts">
+                <canvas id="originMarketPassengersChart" class="tabcontent"></canvas>
+                <canvas id="destMarketPassengersChart" class="tabcontent"></canvas>
+                <canvas id="originAirportPassengersChart" class="tabcontent"></canvas>
+                <canvas id="destAirportPassengersChart" class="tabcontent"></canvas>
+                <canvas id="marketRoutePassengersChart" class="tabcontent"></canvas>
+                <canvas id="routePassengersChart" class="tabcontent"></canvas>
+            </div>
         </div>
 
         <script type="text/javascript" src="js/main.js"></script>
