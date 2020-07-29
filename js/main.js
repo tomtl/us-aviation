@@ -20,6 +20,7 @@ require([
         originMarket: "ALL ORIGIN MARKETS",
         originAirport: "ALL ORIGIN AIRPORTS",
         destMarket: "ALL DESTINATION MARKETS",
+        destAirport: "ALL DESTINATION AIRPORTS",
         year: "2019"
     };
 
@@ -152,7 +153,7 @@ require([
     watchUtils.whenFalseOnce(view, "updating", generateFilter("origin_market_name", "originMarkets"));
     watchUtils.whenFalseOnce(view, "updating", generateFilter("origin", "originAirports"));
     watchUtils.whenFalseOnce(view, "updating", generateFilter("dest_market_name", "destMarkets"));
-
+    watchUtils.whenFalseOnce(view, "updating", generateFilter("dest", "destAirports"));
 
     // Create the chart
     // Airline Passengers pie chart
@@ -212,6 +213,8 @@ require([
         let groupByField = field;
         if (field == "origin") {
             groupByField = "origin || ' - ' || origin_airport_name";
+        } else if (field == "dest") {
+            groupByField = "dest || ' - ' || dest_airport_name";
         }
 
         const query = routesLayer.createQuery();
@@ -230,7 +233,7 @@ require([
             var names = [];
             infos.forEach(function(info){
                 let columnName = field;
-                if (field == 'origin') { columnName = 'EXPR_1'; }
+                if (field == 'origin' || field == 'dest') { columnName = 'EXPR_1'; }
                 names.push(info.attributes[columnName]);
             });
 
@@ -253,6 +256,8 @@ require([
                 filterMenu.addEventListener("change", filterByOriginAirport)
             } else if (attribute == "destMarkets") {
                 filterMenu.addEventListener("change", filterByDestMarket)
+            } else if (attribute == "destAirports") {
+                filterMenu.addEventListener("change", filterByDestAirport)
             }
         });
     };
@@ -309,6 +314,16 @@ require([
         }
     };
 
+    function filterByDestAirport(event) {
+        const selectedAirport = event.target.value.split(" - ")[0];
+
+        if (selectedAirport) {
+            filterValues.destAirport = selectedAirport;
+            filterRoutesByAirlineMarket();
+            updateAllCharts();
+        }
+    };
+
     function filterRoutesByAirlineMarket() {
         let whereStatement = createWhereStatement(filterValues);
         filterLayer(routesLayer, whereStatement);
@@ -319,6 +334,7 @@ require([
         let originMarketName = filters.originMarket;
         let originAirport = filters.originAirport;
         let destMarketName = filters.destMarket;
+        let destAirport = filters.destAirport;
         let whereStatement = "";
 
 
@@ -347,6 +363,14 @@ require([
                 whereStatement = `dest_market_name = '${destMarketName}'`;
             } else {
                 whereStatement += ` AND dest_market_name = '${destMarketName}'`;
+            }
+        }
+
+        if (destAirport != "ALL DESTINATION AIRPORTS") {
+            if (whereStatement.length == 0) {
+                whereStatement = `dest = '${destAirport}'`;
+            } else {
+                whereStatement += ` AND dest = '${destAirport}'`;
             }
         }
 
