@@ -19,6 +19,7 @@ require([
         airline: "ALL AIRLINES",
         originMarket: "ALL ORIGIN MARKETS",
         originAirport: "ALL ORIGIN AIRPORTS",
+        destMarket: "ALL DESTINATION MARKETS",
         year: "2019"
     };
 
@@ -150,6 +151,8 @@ require([
     watchUtils.whenFalseOnce(view, "updating", generateFilter("unique_carrier_name", "airlines"));
     watchUtils.whenFalseOnce(view, "updating", generateFilter("origin_market_name", "originMarkets"));
     watchUtils.whenFalseOnce(view, "updating", generateFilter("origin", "originAirports"));
+    watchUtils.whenFalseOnce(view, "updating", generateFilter("dest_market_name", "destMarkets"));
+
 
     // Create the chart
     // Airline Passengers pie chart
@@ -248,6 +251,8 @@ require([
                 filterMenu.addEventListener("change", filterByOriginMarket)
             } else if (attribute == "originAirports") {
                 filterMenu.addEventListener("change", filterByOriginAirport)
+            } else if (attribute == "destMarkets") {
+                filterMenu.addEventListener("change", filterByDestMarket)
             }
         });
     };
@@ -294,6 +299,16 @@ require([
         }
     };
 
+    function filterByDestMarket(event) {
+        const selectedMarket = event.target.value;
+
+        if (selectedMarket) {
+            filterValues.destMarket = selectedMarket;
+            filterRoutesByAirlineMarket();
+            updateAllCharts();
+        }
+    };
+
     function filterRoutesByAirlineMarket() {
         let whereStatement = createWhereStatement(filterValues);
         filterLayer(routesLayer, whereStatement);
@@ -303,6 +318,7 @@ require([
         let airlineName = filters.airline;
         let originMarketName = filters.originMarket;
         let originAirport = filters.originAirport;
+        let destMarketName = filters.destMarket;
         let whereStatement = "";
 
 
@@ -326,6 +342,14 @@ require([
             }
         }
 
+        if (destMarketName != "ALL DESTINATION MARKETS") {
+            if (whereStatement.length == 0) {
+                whereStatement = `dest_market_name = '${destMarketName}'`;
+            } else {
+                whereStatement += ` AND dest_market_name = '${destMarketName}'`;
+            }
+        }
+
         return whereStatement;
     };
 
@@ -336,7 +360,7 @@ require([
 
         // include ALL AIRLINES option
         allOption = "ALL " + id.toUpperCase();
-        allOption = allOption.replace("ORIGIN", "ORIGIN ").replace("DEST", "DEST. ");
+        allOption = allOption.replace("ORIGIN", "ORIGIN ").replace("DEST", "DESTINATION ");
         values.unshift(allOption);
 
         for (const val of values) {
