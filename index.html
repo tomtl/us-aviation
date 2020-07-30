@@ -36,27 +36,30 @@
             Console(carriers);
             return carriers;
         </script> -->
+        <div id="titleBar">
+            <h1>U.S. Passenger Aviation Statistics</h1>
+        </div>
 
         <div id="viewDiv"></div>
 
         <div id="leftPanel">
             <h2>Filters</h2>
-            <div id="airlinesFilter">
+            <div id="airlinesFilter" class="filter">
                 Airlines
             </div>
-            <div id="originMarketsFilter">
+            <div id="originMarketsFilter" class="filter">
                 Origin Markets
             </div>
-            <div id="originAirportsFilter">
+            <div id="originAirportsFilter" class="filter">
                 Origin Airports
             </div>
-            <div id="destMarketsFilter">
+            <div id="destMarketsFilter" class="filter">
                 Destination Markets
             </div>
-            <div id="destAirportsFilter">
+            <div id="destAirportsFilter" class="filter">
                 Destination Airports
             </div>
-            <div id="yearSelector">
+            <div id="yearSelector" class="filter">
                 Year
                 <select id="years" autocomplete="off">
                     <option value="2019" selected>2019</option>

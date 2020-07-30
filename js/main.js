@@ -608,6 +608,15 @@ require([
         } else {
             topAirlines = passengerCounts;
         }
+
+        // remove any airlines with 0 passengers
+        let zeroCount = 0;
+        for (var j=0; j<topAirlines.length; j++) {
+            if (topAirlines[j].passengers == 0) {
+                zeroCount += 1;
+            }
+        }
+        topAirlines = topAirlines.slice(0, (topAirlines.length - zeroCount));
         
         return topAirlines;
     };
@@ -653,6 +662,15 @@ require([
         } else {
             topAirlines = passengerMiles;
         }
+
+        // remove any airlines with 0 passengers
+        let zeroCount = 0;
+        for (var j=0; j<topAirlines.length; j++) {
+            if (topAirlines[j].passengerMiles == 0) {
+                zeroCount += 1;
+            }
+        }
+        topAirlines = topAirlines.slice(0, (topAirlines.length - zeroCount));
         
         return topAirlines;
     };
