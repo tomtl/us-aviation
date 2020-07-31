@@ -5,7 +5,7 @@ require([
     "esri/layers/FeatureLayer",
     "esri/views/layers/support/FeatureFilter",
     "esri/core/watchUtils",
-    "esri/renderers/smartMapping/statistics/uniqueValues"
+    "esri/smartMapping/statistics/summaryStatistics"
 ], function(
     Basemap,
     Map, 
@@ -13,7 +13,7 @@ require([
     FeatureLayer,
     FeatureFilter,
     watchUtils,
-    uniqueValues
+    summaryStatistics
 ) {
     let filterValues = {
         airline: "ALL AIRLINES",
@@ -65,27 +65,14 @@ require([
     const routesLayer = new FeatureLayer({
         title: "routesLayer",
         url: "https://services2.arcgis.com/GBMwyWOj5RVtr5Jk/arcgis/rest/services/routes_20200705/FeatureServer/0",
-        // definitionExpression: "unique_carrier_name = 'Southwest Airlines Co.'",  
         renderer: {
             type: "simple",
             symbol: {
                 type: "simple-line",
                 color: "#00c5ff",
-                width: 1
+                width: 1,
+                opacity: 0.1
             },
-            visualVariables: [
-                {
-                    type: "opacity",
-                    field: "pass_" + filterValues.year,
-                    stops: [
-                        {value: 0, opacity: 0.00},
-                        {value: 1, opacity: 0.05},
-                        {value: 100000, opacity: 0.05},
-                        {value: 300000, opacity: 0.30},
-                        {value: 500000, opacity: 0.90}
-                    ]
-                }
-            ]
         }
     });
 
@@ -144,8 +131,63 @@ require([
         container: "viewDiv",
         map: map,
         center: [-96.0, 34.0],
-        zoom: 4
-    });    
+        zoom: 3
+    });
+    
+    // adjust routes transparency
+    watchUtils.whenFalseOnce(view, "updating", updateRoutesTransparency(routesLayer));
+
+    function updateRoutesTransparency(layer) {
+        // get the passenger statistics
+        summaryStatistics({
+            layer: layer,
+            field: "pass_" + filterValues.year,
+            view: view,
+            minValue: 1,
+            sqlWhere: createWhereStatement(filterValues)
+        }).then(function(stats){
+            updateTransparency(stats, layer);
+        });
+    };
+
+    function updateTransparency(stats, layer){
+        // change the transparency based on the statistics
+        let statsLow = parseInt(stats.avg);
+        let statsMid = parseInt(stats.max * 0.5);
+        let statsHigh = parseInt(stats.max);
+
+        if (statsMid <= statsLow){
+            // make sure stats increase from low to high
+            statsLow = statsMid * 0.5;
+        }
+
+        let minOpacity = 0.05;
+        let midOpacity = 0.30;
+        let maxOpacity = 0.90
+        if (stats.count < 100){
+            // increase min transparency on maps with low route counts
+            minOpacity = 0.12;
+        } else if (stats.count > 500) {
+            // decrease transparency on maps with high route counts
+            minOpacity = 0.02;
+            midOpacity = 0.20;
+            maxOpacity = 0.60;
+        }
+
+        layer.renderer.visualVariables = [
+            {
+                type: "opacity",
+                field: "pass_" + filterValues.year,
+                stops: [
+                    {value: 0, opacity: 0.00},
+                    {value: 1, opacity: minOpacity},
+                    {value: statsLow, opacity: minOpacity}, 
+                    {value: statsMid, opacity: midOpacity}, 
+                    {value: statsHigh, opacity: maxOpacity} 
+                ]
+            }
+        ];
+    };
 
     // airlines filter
     // list of airlines
@@ -281,6 +323,7 @@ require([
         updateDestAirportPassengersChart(destAirportPassengersChart);
         updateRoutePassengersChart(routePassengersChart);
         updateMarketRoutePassengersChart(marketRoutePassengersChart);
+        updateRoutesTransparency(routesLayer)
     };
 
     // Markets filter
