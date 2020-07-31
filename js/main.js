@@ -36,16 +36,16 @@ require([
                     width: 1,
                     color: "#d6d6d6"
                 },
-                size: "8"
+                size: "4"
             },
             visualVariables: [
                 {
                     type: "size",
                     field: "pass_" + filterValues.year,
                     stops: [
-                        {value: 1000000, size: 4, label: "< 1 million"},
-                        {value: 25000000, size: 17, label: "10 million"},
-                        {value: 50000000, size: 30, label: "> 50 million"},
+                        {value: 1000000, size: 2, label: "< 1 million"},
+                        {value: 25000000, size: 4, label: "10 million"},
+                        {value: 50000000, size: 6, label: "> 50 million"},
                     ]
                 },
                 {                
