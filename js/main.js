@@ -65,6 +65,8 @@ require([
     const routesLayer = new FeatureLayer({
         title: "routesLayer",
         url: "https://services2.arcgis.com/GBMwyWOj5RVtr5Jk/arcgis/rest/services/routes_20200705/FeatureServer/0",
+        // definitionExpression: "origin = 'BOS'",
+        // fields: ["origin", "dest"],
         renderer: {
             type: "simple",
             symbol: {
@@ -76,46 +78,22 @@ require([
         }
     });
 
-    // const arcadeScript = document.getElementById("routes-arcade").text;
-
     const routesPopupTemplate = {
-        title: "{origin} - {dest}",
+        title: "{origin} - {dest}: {unique_carrier_name}",
         content: [
             {
-                type: "fields",
-                fieldInfos: [
-                    {
-                        fieldName: "origin_airport_name",
-                        label: "Origin airport"
-                    },
-                    {
-                        fieldName: "origin_market_name",
-                        label: "Origin market"
-                    },
-                    {
-                        fieldName: "dest_airport_name",
-                        label: "Destination airport"
-                    },
-                    {
-                        fieldName: "dest_market_name",
-                        label: "Destination market"
-                    },
-                    {
-                        fieldName: "distance_miles",
-                        label: "Distance (miles)",
-                        format: {
-                            digitSeparator: true,
-                        }
-                    }
-                ]
+            type: "text",
+            text: "<p><b>Airline:</b> {unique_carrier_name}</p>" +
+                "<p><b>From:</b> {origin} - {origin_airport_name} Airport in the {origin_market_name} market area.</p>" +
+                "<p><b>To:</b> {dest} - {dest_airport_name} Airport in the {dest_market_name} market area.</p>" +
+                "<p><b>2019:</b> {pass_2019} passengers</p>" +
+                "<p><b>2018:</b> {pass_2018} passengers</p>" +
+                "<p><b>2017:</b> {pass_2017} passengers</p>" +
+                "<p><b>Distance:</b> {distance_miles} miles</p>"
             }
         ]
-        // expressionInfos: [{
-        //     name: "airlines-count",
-        //     title: "Airlines count",
-        //     expression: arcadeScript
-        // }]
     };
+
     routesLayer.popupTemplate = routesPopupTemplate;
 
     const basemap = new Basemap({
