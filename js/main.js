@@ -1051,3 +1051,10 @@ function openChart(evt, tabName) {
     document.getElementById(tabName).style.display = "block";
     evt.currentTarget.className += " active";
 };
+
+document.getElementById("hideSplashScreen").addEventListener("click", hideSplashScreen);
+function hideSplashScreen() {
+    // hide the splash screen
+    const splashScreen = document.getElementById("splashScreen");
+    splashScreen.style.display = "none";
+};
