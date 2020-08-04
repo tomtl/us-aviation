@@ -15,8 +15,16 @@
         <link rel="stylesheet" href="css/style.css">
     </head>
     <body>
+        <div id="splashScreen">
+            <h2>U.S. Aviation Statistics</h2>
+            <p>This app shows U.S. domestic and international passenger counts by airline and route from the U.S. Department of Trasportation T-100 database.</p>
+            <p>Use the filters on the left to investigate specific airlines, airports, city markets, or years.
+            The map and charts automatically update when you change filters.</p>
+            <p>Built by Tom Lee, 2020 using the ArcGIS Javascript API</p>
+            <button id="hideSplashScreen" onclick="hideSplashScreen()">Start</button>
+        </div>
         <div id="titleBar">
-            <h1>U.S. Passenger Aviation Statistics</h1>
+            <h1>U.S. Aviation Statistics</h1>
         </div>
 
         <div id="viewDiv"></div>
