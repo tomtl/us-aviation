@@ -32,6 +32,7 @@ body {
 #titleBar h1 {
     font-family: "SkyFont";
     font-size: 46px;
+    font-weight: 400;
     color: #eee;
     padding: 0.1rem 1rem 0.1rem 1rem;
     margin: 0;
@@ -57,7 +58,7 @@ body {
     top: 50px;
     bottom: 235px;
     left: 1%;
-    overflow: scroll;
+    overflow-y: scroll;
 }
 
 #leftPanel h2 {
@@ -75,7 +76,7 @@ body {
     top: 50px;
     bottom: 235px;
     right: 0;
-    overflow: scroll;
+    overflow-y: scroll;
 }
 
 #rightPanel h2 {
@@ -194,6 +195,7 @@ button.tablink.active {
 #splashScreen h2 {
     text-align: center;
     font-family: "SkyFont";
+    font-weight: 400;
     font-size: 52px;
     color: #eee;
     padding: 0.1rem 1rem 0.1rem 1rem;
