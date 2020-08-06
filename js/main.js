@@ -21,7 +21,8 @@ require([
         originAirport: "ALL ORIGIN AIRPORTS",
         destMarket: "ALL DESTINATION MARKETS",
         destAirport: "ALL DESTINATION AIRPORTS",
-        year: "2019"
+        year: "2019",
+        competition: false
     };
 
     // market points
@@ -64,7 +65,7 @@ require([
     // routes layer
     const routesLayer = new FeatureLayer({
         title: "routesLayer",
-        url: "https://services2.arcgis.com/GBMwyWOj5RVtr5Jk/arcgis/rest/services/routes_20200705/FeatureServer/0",
+        url: "https://services2.arcgis.com/GBMwyWOj5RVtr5Jk/arcgis/rest/services/comp_routes_20200805/FeatureServer",
         // definitionExpression: "origin = 'BOS'",
         // fields: ["origin", "dest"],
         renderer: {
@@ -113,9 +114,9 @@ require([
     });
     
     // adjust routes transparency
-    watchUtils.whenFalseOnce(view, "updating", updateRoutesTransparency(routesLayer));
+    watchUtils.whenFalseOnce(view, "updating", updateRoutesMap(routesLayer));
 
-    function updateRoutesTransparency(layer) {
+    function updateRoutesMap(layer) {
         // get the passenger statistics
         summaryStatistics({
             layer: layer,
@@ -152,20 +153,48 @@ require([
             maxOpacity = 0.60;
         }
 
-        layer.renderer.visualVariables = [
-            {
-                type: "opacity",
-                field: "pass_" + filterValues.year,
-                stops: [
-                    {value: 0, opacity: 0.00},
-                    {value: 1, opacity: minOpacity},
-                    {value: statsLow, opacity: minOpacity}, 
-                    {value: statsMid, opacity: midOpacity}, 
-                    {value: statsHigh, opacity: maxOpacity} 
-                ]
-            }
-        ];
+        const opacityRenderer = {
+            type: "opacity",
+            field: "pass_" + filterValues.year,
+            stops: [
+                {value: 0, opacity: 0.00},
+                {value: 1, opacity: minOpacity},
+                {value: statsLow, opacity: minOpacity, label: "Low"}, 
+                {value: statsMid, opacity: midOpacity, label: "Medium"}, 
+                {value: statsHigh, opacity: maxOpacity, label: "High"} 
+            ]
+        };
+
+        const colorRenderer = {
+            type: "color",
+            field: "comp_" + filterValues.year,
+            stops: [
+                { value: 0.00, color: "#ff2638", label: "High" },
+                { value: 0.33, color: "#ffea8c", label: "Medium" },
+                { value: 0.65, color: "#23ccff", label: "Low" }
+            ]
+        };
+
+        let routesRenderer = routesLayer.renderer.clone();
+        if (filterValues.competition == false) {
+            routesRenderer.visualVariables = [opacityRenderer];
+        } else if (filterValues.competition == true) {
+            routesRenderer.visualVariables = [colorRenderer, opacityRenderer];
+        }
+        routesLayer.renderer = routesRenderer;
     };
+
+    // competition toggle
+    const compSwitch = document.querySelector('input[type="checkbox"]');
+    compSwitch.addEventListener('change', function () {
+        if (compSwitch.checked) {
+            filterValues.competition = true;
+            updateRoutesMap(routesLayer);
+        } else {
+            filterValues.competition = false;
+            updateRoutesMap(routesLayer);
+        }
+    });
 
     // airlines filter
     // list of airlines
@@ -301,7 +330,7 @@ require([
         updateDestAirportPassengersChart(destAirportPassengersChart);
         updateRoutePassengersChart(routePassengersChart);
         updateMarketRoutePassengersChart(marketRoutePassengersChart);
-        updateRoutesTransparency(routesLayer)
+        updateRoutesMap(routesLayer)
     };
 
     // Markets filter
@@ -438,9 +467,7 @@ require([
             filterValues.year = selectedYear;
 
             // update the routes layer renderer to point to new field
-            let routesRenderer = routesLayer.renderer.clone();
-            routesRenderer.visualVariables[0].field = "pass_" + filterValues.year;
-            routesLayer.renderer = routesRenderer;
+            updateRoutesMap(routesLayer);
 
             // update the markets layer renderer to point to new field
             let marketsRenderer = marketsLayer.renderer.clone();
