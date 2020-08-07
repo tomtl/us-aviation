@@ -5,7 +5,9 @@ require([
     "esri/layers/FeatureLayer",
     "esri/views/layers/support/FeatureFilter",
     "esri/core/watchUtils",
-    "esri/smartMapping/statistics/summaryStatistics"
+    "esri/smartMapping/statistics/summaryStatistics",
+    "esri/widgets/Legend",
+    "esri/widgets/Expand"
 ], function(
     Basemap,
     Map, 
@@ -13,14 +15,16 @@ require([
     FeatureLayer,
     FeatureFilter,
     watchUtils,
-    summaryStatistics
+    summaryStatistics,
+    Legend,
+    Expand
 ) {
     let filterValues = {
-        airline: "ALL AIRLINES",
-        originMarket: "ALL ORIGIN MARKETS",
-        originAirport: "ALL ORIGIN AIRPORTS",
-        destMarket: "ALL DESTINATION MARKETS",
-        destAirport: "ALL DESTINATION AIRPORTS",
+        airline: "All Airlines",
+        originMarket: "All Origin Markets",
+        originAirport: "All Origin Airports",
+        destMarket: "All Destination Markets",
+        destAirport: "All Destination Airports",
         year: "2019",
         competition: false
     };
@@ -71,10 +75,11 @@ require([
         renderer: {
             type: "simple",
             symbol: {
+                label: "Route",
                 type: "simple-line",
                 color: "#00c5ff",
                 width: 1,
-                opacity: 0.1
+                opacity: 0.1,
             },
         }
     });
@@ -112,6 +117,20 @@ require([
         center: [-96.0, 34.0],
         zoom: 3
     });
+
+    const legend = new Expand({
+        content: new Legend({
+            view: view,
+            style: "classic",
+            layerInfos: [{
+                layer: routesLayer,
+                title: "Legend"
+            }],
+        }),
+        view: view,
+        expanded: false
+    });
+    view.ui.add(legend, "bottom-left");
     
     // adjust routes transparency
     watchUtils.whenFalseOnce(view, "updating", updateRoutesMap(routesLayer));
@@ -157,22 +176,28 @@ require([
             type: "opacity",
             field: "pass_" + filterValues.year,
             stops: [
-                {value: 0, opacity: 0.00},
+                {value: 0, opacity: 0.00, label: "None"},
                 {value: 1, opacity: minOpacity},
                 {value: statsLow, opacity: minOpacity, label: "Low"}, 
                 {value: statsMid, opacity: midOpacity, label: "Medium"}, 
                 {value: statsHigh, opacity: maxOpacity, label: "High"} 
-            ]
+            ],
+            legendOptions: {
+                title: "Passengers",
+            }
         };
 
         const colorRenderer = {
             type: "color",
             field: "comp_" + filterValues.year,
             stops: [
-                { value: 0.00, color: "#ff2638", label: "High" },
+                { value: 0.65, color: "#23ccff", label: "Low" },
                 { value: 0.33, color: "#ffea8c", label: "Medium" },
-                { value: 0.65, color: "#23ccff", label: "Low" }
-            ]
+                { value: 0.00, color: "#ff2638", label: "High" }
+            ],
+            legendOptions: {
+                title: "Competition",
+            }
         };
 
         let routesRenderer = routesLayer.renderer.clone();
@@ -190,6 +215,7 @@ require([
         if (compSwitch.checked) {
             filterValues.competition = true;
             updateRoutesMap(routesLayer);
+            legend.expanded = true;
         } else {
             filterValues.competition = false;
             updateRoutesMap(routesLayer);
@@ -388,11 +414,11 @@ require([
         let whereStatement = "";
 
 
-        if (airlineName != "ALL AIRLINES") {
+        if (airlineName != "All Airlines") {
             whereStatement = `unique_carrier_name = '${airlineName}'`;
         }
 
-        if (originMarketName != "ALL ORIGIN MARKETS") {
+        if (originMarketName != "All Origin Markets") {
             if (whereStatement.length == 0) {
                 whereStatement = `origin_market_name = '${originMarketName}'`;
             } else {
@@ -400,7 +426,7 @@ require([
             }
         }
 
-        if (originAirport != "ALL ORIGIN AIRPORTS") {
+        if (originAirport != "All Origin Airports") {
             if (whereStatement.length == 0) {
                 whereStatement = `origin = '${originAirport}'`;
             } else {
@@ -408,7 +434,7 @@ require([
             }
         }
 
-        if (destMarketName != "ALL DESTINATION MARKETS") {
+        if (destMarketName != "All Destination Markets") {
             if (whereStatement.length == 0) {
                 whereStatement = `dest_market_name = '${destMarketName}'`;
             } else {
@@ -416,7 +442,7 @@ require([
             }
         }
 
-        if (destAirport != "ALL DESTINATION AIRPORTS") {
+        if (destAirport != "All Destination Airports") {
             if (whereStatement.length == 0) {
                 whereStatement = `dest = '${destAirport}'`;
             } else {
@@ -432,9 +458,9 @@ require([
         let itemsSelect = document.createElement("select");
         itemsSelect.id = id;
 
-        // include ALL AIRLINES option
-        allOption = "ALL " + id.toUpperCase();
-        allOption = allOption.replace("ORIGIN", "ORIGIN ").replace("DEST", "DESTINATION ");
+        // include All Airlines option
+        allOption = "All " + toProperCase(id);
+        allOption = allOption.replace("Origin", "Origin ").replace("Dest", "Destination ");
         values.unshift(allOption);
 
         for (const val of values) {
@@ -446,6 +472,15 @@ require([
         };
 
         return itemsSelect;
+    }
+
+    function toProperCase(str) {
+        return str.replace(
+            /\w\S*/g,
+            function(txt) {
+                return txt.charAt(0).toUpperCase() + txt.substr(1);
+            }
+        );
     }
 
     function filterLayer(layer, whereStatement) {
