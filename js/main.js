@@ -265,6 +265,14 @@ require([
     let marketRoutePassengersChart = createBarChart("marketRoutePassengersChart");
     updateMarketRoutePassengersChart(marketRoutePassengersChart);
 
+    // Airline passengers bar chart
+    let airlinePassengersBarChart = createBarChart("airlinePassengersBarChart");
+    updateAirlinePassengersBarChart(airlinePassengersBarChart);
+
+    // Airline passenger miles bar chart
+    let airlinePassengerMilesBarChart = createBarChart("airlinePassengerMilesBarChart");
+    updateAirlinePassengerMilesBarChart(airlinePassengerMilesBarChart);
+
     // Hide all the bar charts except the first one
     hideInactiveBarCharts();
     function hideInactiveBarCharts(){
@@ -356,6 +364,8 @@ require([
         updateDestAirportPassengersChart(destAirportPassengersChart);
         updateRoutePassengersChart(routePassengersChart);
         updateMarketRoutePassengersChart(marketRoutePassengersChart);
+        updateAirlinePassengersBarChart(airlinePassengersBarChart);
+        updateAirlinePassengerMilesBarChart(airlinePassengerMilesBarChart);
         updateRoutesMap(routesLayer)
     };
 
@@ -570,7 +580,8 @@ require([
                                     + formatNumberLabel(value)
                                 );
                             },
-                            color: '#eee'
+                            color: '#eee',
+                            display: "auto"
                         }
                     }
                 }
@@ -601,38 +612,19 @@ require([
 
     function updateAirlinePassengerMilesChart(chart, filterValues){
         // update the airline passenger miles chart when filters change
-        const query = createAirlinePassengerMilesQuery(routesLayer);
-    
+        const query = createPassengerMilesQuery(routesLayer, "unique_carrier_name");
+
         routesLayer.queryFeatures(query).then(function(response){
+            response.features.forEach(parseResults);
+            function parseResults(result){
+                result.attributes["passenger_miles"] = result.attributes["passenger_miles_million"] * 1000000.0
+            };
+
             let topAirlines = getTopAirlinePassengerMiles(response.features);
             let [labels, data ] = setupAirlinePassengerMilesData(topAirlines);
 
             loadPieChart(chart, labels, data);
         });
-    };
-
-    function createAirlinePassengerMilesQuery(layer){
-        // Create the query for the airline passenger miles chart
-        const query = layer.createQuery();
-        query.outStatistics = [
-            {
-                onStatisticField: "pass_" + filterValues.year,
-                outStatisticFieldName: "passengers",
-                statisticType: "sum"
-            },
-            {
-                onStatisticField: "distance_miles",
-                outStatisticFieldName: "distance",
-                statisticType: "avg"
-            }
-        ];
-    
-        let whereStatement = createWhereStatement(filterValues);
-        query.where = whereStatement;
-    
-        query.groupByFieldsForStatistics = [ "unique_carrier_name" ];
-
-        return query;
     };
 
     function formatNumberLabel(val) {
@@ -652,8 +644,8 @@ require([
     
     function getTopAirlinePassengers(results) {
         // Get the top airlines and their passenger counts
-        const topAirlineCount = 6; // The count of Top Airlines to include
-        const minimumPercent = 5; // the minimum percent a value needs to be to be included on chart
+        const topAirlineCount = 7; // The count of Top Airlines to include
+        const minimumPercent = 2; // the minimum percent a value needs to be to be included on chart
 
         // parse the data
         let passengerCounts = [];
@@ -706,8 +698,8 @@ require([
 
     function getTopAirlinePassengerMiles(results) {
         // Get the top airlines and their passenger counts
-        const topAirlineCount = 6; // The count of Top Airlines to include
-        const minimumPercent = 4; // the minimum percent a value needs to be to be included on chart
+        const topAirlineCount = 7; // The count of Top Airlines to include
+        const minimumPercent = 2; // the minimum percent a value needs to be to be included on chart
 
         // parse the data
         let passengerMiles = [];
@@ -715,7 +707,8 @@ require([
         function parseResults(result){
             let airlinePassengerCount = {};
             airlinePassengerCount.airline = result.attributes["unique_carrier_name"];
-            airlinePassengerCount.passengerMiles = result.attributes.passengers * result.attributes.distance;
+            // airlinePassengerCount.passengerMiles = result.attributes.passengers * result.attributes.distance;
+            airlinePassengerCount.passengerMiles = result.attributes["passenger_miles"];
             passengerMiles.push(airlinePassengerCount);
         };
 
@@ -853,16 +846,18 @@ require([
             labels: labels,
             datasets: [{
                 data: data,
-                backgroundColor: "#00c5ff",
-                borderWidth: "1",
-                borderColor: "00AAFF",
+                // backgroundColor: "#00c5ff",
+                backgroundColor: "#00BCFB",
+                borderWidth: "1.5",
+                // borderColor: "00AAFF",
+                borderColor: "#00c5ff",
                 datalabels: {
                     labels: {
                         name: {
                             anchor: "end",
                             align: "top",
                             offset: 2,
-                            color: "#eee",
+                            color: "#aaa",
                             formatter: function(value, ctx) {
                                 return (
                                     formatNumberLabel(value)
@@ -895,7 +890,7 @@ require([
                 }],
                 xAxes: [{
                     ticks: {
-                        // fontColor: "#ff0000"
+                        fontColor: "#ccc",
                         callback: function(value, index, values){
                             return formatMarketName(value);
                         }
@@ -989,6 +984,35 @@ require([
         });
     };
 
+    function updateAirlinePassengersBarChart(chart){
+        // update the airline passenger bar chart when filters change
+        const query = createPassengerCountsQuery(routesLayer, "unique_carrier_name");
+    
+        routesLayer.queryFeatures(query).then(function(response){
+            let topMarkets = getTopNameValue(response.features, "unique_carrier_name", "passengers");
+            let [labels, data ] = setupNameValuesData(topMarkets);
+
+            loadBarChart(chart, labels, data);
+        });
+    };
+
+    function updateAirlinePassengerMilesBarChart(chart){
+        // update the airline passenger bar chart when filters change
+        const query = createPassengerMilesQuery(routesLayer, "unique_carrier_name");
+    
+        routesLayer.queryFeatures(query).then(function(response){
+            response.features.forEach(parseResults);
+            function parseResults(result){
+                result.attributes["passenger_miles"] = result.attributes["passenger_miles_million"] * 1000000.0
+            };
+
+            let topMarkets = getTopNameValue(response.features, "unique_carrier_name", "passenger_miles");
+            let [labels, data ] = setupNameValuesData(topMarkets);
+
+            loadBarChart(chart, labels, data);
+        });
+    };
+
     function createPassengerCountsQuery(layer, column){
         // Create the query for the airline passenger counts pie chart
         const query = layer.createQuery();
@@ -1006,14 +1030,16 @@ require([
         return query;
     };
 
-        function createPassengerCountsQuery(layer, column){
-        // Create the query for the airline passenger counts pie chart
+    function createPassengerMilesQuery(layer, column){
+        // Create the query for the airline passenger miles bar chart
         const query = layer.createQuery();
-        query.outStatistics = [{
-            onStatisticField: "pass_" + filterValues.year,
-            outStatisticFieldName: "passengers",
-            statisticType: "sum"
-        }];
+        query.outStatistics = [
+            {
+                onStatisticField: "0.000001 * pass_" + filterValues.year + " * distance_miles",
+                outStatisticFieldName: "passenger_miles_million",
+                statisticType: "sum"
+            },
+        ];
     
         let whereStatement = createWhereStatement(filterValues);
         query.where = whereStatement;
