@@ -4,13 +4,14 @@
     font-family: 'SkyFont';
     src: url('../lib/Skyfont/Skyfont.otf'); /* IE9 Compat Modes */
     src: url('../lib/Skyfont/Skyfont.otf?#iefix') format('embedded-opentype'), /* IE6-IE8 */
-  }
+}
+* {-webkit-font-smoothing: antialiased;}
 
-  :root {
+:root {
     --background-grey: #191919;
     --background-lightgrey: #323232;
     --background-darkblue: #00123e;
-  }
+}
 
 html,
 body {
@@ -19,14 +20,17 @@ body {
     background-color: var(--background-grey);
     color: #ccc;
     font-family: 'Open Sans';
+    font-weight: 300;
 }
 
 #titleBar {
     position: absolute;
     top: 0px;
     height: 49px;
-    width: 100%;
+    width: 95%;
     background-color: var(--background-grey);
+    padding: 0.1rem 1rem 0.1rem 1rem;
+    color: #888;
 }
 
 #titleBar h1 {
@@ -34,9 +38,19 @@ body {
     font-size: 46px;
     font-weight: 400;
     color: #eee;
-    padding: 0.1rem 1rem 0.1rem 1rem;
     margin: 0;
     letter-spacing: 0.05em;
+    display: inline-block;
+}
+
+#titleBar a {
+    color: #eee;
+    text-decoration: none;
+}
+
+#titleBar a:hover {
+    font-weight: bold;
+    color: #fff;
 }
 
 #viewDiv {
@@ -101,10 +115,6 @@ body {
     height: 500px;
     width: 350px;
 }
-
-/* select {
-    width: 250px;
-} */
 
 select {
 	display: block;
@@ -204,6 +214,17 @@ button.tablink.active {
     letter-spacing: 0.05em;
 }
 
+#splashScreen a {
+    color: #ccc;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+#splashScreen a:hover {
+    font-weight: bold;
+    color: #fff;
+}
+
 #splashScreen button {
     display: block;
     margin-left: auto;
@@ -271,6 +292,13 @@ input:checked + .slider:before {
     -webkit-transform: translateX(26px);
     -ms-transform: translateX(26px);
     transform: translateX(26px);
+}
+
+@media (max-width: 1500px) {
+    button.tablink {
+        width: calc(95% /8);
+        vertical-align: middle;
+    }
 }
 
 @media (max-width: 1200px) {
@@ -367,5 +395,21 @@ input:checked + .slider:before {
     button.tablink {
         height: 44px;
         line-height: 0.8rem;
+    }
+}
+
+@media (max-width: 400px) {
+    /* more room for title */
+    #leftPanel {
+        top: 150px;
+    }
+    #viewDiv {
+        top: 550px;
+    }
+    #rightPanel {
+        top: 950px;
+    }
+    #bottomPanel {
+        top: 1350px;
     }
 }
