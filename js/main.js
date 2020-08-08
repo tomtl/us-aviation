@@ -265,6 +265,10 @@ require([
     let marketRoutePassengersChart = createBarChart("marketRoutePassengersChart");
     updateMarketRoutePassengersChart(marketRoutePassengersChart);
 
+    // Airline passengers bar chart
+    let airlinePassengersBarChart = createBarChart("airlinePassengersBarChart");
+    updateAirlinePassengersBarChart(airlinePassengersBarChart);
+
     // Hide all the bar charts except the first one
     hideInactiveBarCharts();
     function hideInactiveBarCharts(){
@@ -356,6 +360,7 @@ require([
         updateDestAirportPassengersChart(destAirportPassengersChart);
         updateRoutePassengersChart(routePassengersChart);
         updateMarketRoutePassengersChart(marketRoutePassengersChart);
+        updateAirlinePassengersBarChart(airlinePassengersBarChart);
         updateRoutesMap(routesLayer)
     };
 
@@ -652,8 +657,8 @@ require([
     
     function getTopAirlinePassengers(results) {
         // Get the top airlines and their passenger counts
-        const topAirlineCount = 6; // The count of Top Airlines to include
-        const minimumPercent = 5; // the minimum percent a value needs to be to be included on chart
+        const topAirlineCount = 7; // The count of Top Airlines to include
+        const minimumPercent = 3; // the minimum percent a value needs to be to be included on chart
 
         // parse the data
         let passengerCounts = [];
@@ -706,8 +711,8 @@ require([
 
     function getTopAirlinePassengerMiles(results) {
         // Get the top airlines and their passenger counts
-        const topAirlineCount = 6; // The count of Top Airlines to include
-        const minimumPercent = 4; // the minimum percent a value needs to be to be included on chart
+        const topAirlineCount = 7; // The count of Top Airlines to include
+        const minimumPercent = 3; // the minimum percent a value needs to be to be included on chart
 
         // parse the data
         let passengerMiles = [];
@@ -983,6 +988,18 @@ require([
 
         routesLayer.queryFeatures(query).then(function(response){
             let topMarkets = getTopNameValue(response.features, "EXPR_1", "passengers");
+            let [labels, data ] = setupNameValuesData(topMarkets);
+
+            loadBarChart(chart, labels, data);
+        });
+    };
+
+    function updateAirlinePassengersBarChart(chart){
+        // update the airline passenger bar chart when filters change
+        const query = createPassengerCountsQuery(routesLayer, "unique_carrier_name");
+    
+        routesLayer.queryFeatures(query).then(function(response){
+            let topMarkets = getTopNameValue(response.features, "unique_carrier_name", "passengers");
             let [labels, data ] = setupNameValuesData(topMarkets);
 
             loadBarChart(chart, labels, data);
