@@ -295,7 +295,7 @@ input:checked + .slider:before {
     }
     button.tablink {
         font-size: 0.7rem;
-        width: calc(95% /7);
+        width: calc(95% /8);
         vertical-align: middle;
     }
 }

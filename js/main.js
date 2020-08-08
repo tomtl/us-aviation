@@ -269,6 +269,10 @@ require([
     let airlinePassengersBarChart = createBarChart("airlinePassengersBarChart");
     updateAirlinePassengersBarChart(airlinePassengersBarChart);
 
+    // Airline passenger miles bar chart
+    let airlinePassengerMilesBarChart = createBarChart("airlinePassengerMilesBarChart");
+    updateAirlinePassengerMilesBarChart(airlinePassengerMilesBarChart);
+
     // Hide all the bar charts except the first one
     hideInactiveBarCharts();
     function hideInactiveBarCharts(){
@@ -1006,6 +1010,23 @@ require([
         });
     };
 
+    function updateAirlinePassengerMilesBarChart(chart){
+        // update the airline passenger bar chart when filters change
+        const query = createPassengerMilesQuery(routesLayer, "unique_carrier_name");
+    
+        routesLayer.queryFeatures(query).then(function(response){
+            response.features.forEach(parseResults);
+            function parseResults(result){
+                result.attributes["passenger_miles"] = result.attributes["passenger_miles_million"] * 1000000.0
+            };
+
+            let topMarkets = getTopNameValue(response.features, "unique_carrier_name", "passenger_miles");
+            let [labels, data ] = setupNameValuesData(topMarkets);
+
+            loadBarChart(chart, labels, data);
+        });
+    };
+
     function createPassengerCountsQuery(layer, column){
         // Create the query for the airline passenger counts pie chart
         const query = layer.createQuery();
@@ -1023,14 +1044,16 @@ require([
         return query;
     };
 
-        function createPassengerCountsQuery(layer, column){
-        // Create the query for the airline passenger counts pie chart
+    function createPassengerMilesQuery(layer, column){
+        // Create the query for the airline passenger miles bar chart
         const query = layer.createQuery();
-        query.outStatistics = [{
-            onStatisticField: "pass_" + filterValues.year,
-            outStatisticFieldName: "passengers",
-            statisticType: "sum"
-        }];
+        query.outStatistics = [
+            {
+                onStatisticField: "0.000001 * pass_" + filterValues.year + " * distance_miles",
+                outStatisticFieldName: "passenger_miles_million",
+                statisticType: "sum"
+            },
+        ];
     
         let whereStatement = createWhereStatement(filterValues);
         query.where = whereStatement;
