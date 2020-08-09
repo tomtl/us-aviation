@@ -191,9 +191,9 @@ require([
             type: "color",
             field: "comp_" + filterValues.year,
             stops: [
-                { value: 0.65, color: "#23ccff", label: "Low" },
-                { value: 0.33, color: "#ffea8c", label: "Medium" },
-                { value: 0.00, color: "#ff2638", label: "High" }
+                { value: 0.75, color: "#23ccff", label: "Low" },
+                { value: 0.50, color: "#ffea8c", label: "Medium" },
+                { value: 0.20, color: "#ff2638", label: "High" }
             ],
             legendOptions: {
                 title: "Competition",
