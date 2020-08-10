@@ -47,11 +47,24 @@ require([
                 {
                     type: "size",
                     field: "pass_" + filterValues.year,
-                    stops: [
-                        {value: 1000000, size: 2, label: "< 1 million"},
-                        {value: 25000000, size: 4, label: "10 million"},
-                        {value: 50000000, size: 6, label: "> 50 million"},
-                    ]
+                    minDataValue: 10000000,
+                    maxDataValue: 50000000,
+                    minSize: {
+                        type: "size",
+                        valueExpression: "$view.scale",
+                        stops: [
+                            {value: 20000000, size: 3}, // smallest marker at 1:20 million
+                            {value: 50000000, size: 1}, // smallest marker at 1:50 million
+                        ]
+                    },
+                    maxSize: {
+                        type: "size",
+                        valueExpression: "$view.scale",
+                        stops: [
+                            {value: 20000000, size: 6}, // largest marker at 1:20 million
+                            {value: 50000000, size: 3}, // largest marker at 1:50 million
+                        ]
+                    }
                 },
                 {                
                     type: "opacity",
