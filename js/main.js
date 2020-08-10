@@ -47,11 +47,24 @@ require([
                 {
                     type: "size",
                     field: "pass_" + filterValues.year,
-                    stops: [
-                        {value: 1000000, size: 2, label: "< 1 million"},
-                        {value: 25000000, size: 4, label: "10 million"},
-                        {value: 50000000, size: 6, label: "> 50 million"},
-                    ]
+                    minDataValue: 10000000,
+                    maxDataValue: 50000000,
+                    minSize: {
+                        type: "size",
+                        valueExpression: "$view.scale",
+                        stops: [
+                            {value: 20000000, size: 3}, // smallest marker at 1:20 million
+                            {value: 50000000, size: 1}, // smallest marker at 1:50 million
+                        ]
+                    },
+                    maxSize: {
+                        type: "size",
+                        valueExpression: "$view.scale",
+                        stops: [
+                            {value: 20000000, size: 6}, // largest marker at 1:20 million
+                            {value: 50000000, size: 3}, // largest marker at 1:50 million
+                        ]
+                    }
                 },
                 {                
                     type: "opacity",
@@ -99,8 +112,23 @@ require([
             }
         ]
     };
-
     routesLayer.popupTemplate = routesPopupTemplate;
+
+    const countriesLayer = new FeatureLayer({
+        title: "countriesLayer",
+        url: "https://services2.arcgis.com/GBMwyWOj5RVtr5Jk/arcgis/rest/services/Country_borders/FeatureServer",
+        minScale: 75000000, // not visible when zoomed out beyond this scale
+        renderer: {
+            type: "simple",
+            symbol: {
+                label: "Country",
+                type: "simple-line",
+                color: "white",
+                width: 1.0,
+                opacity: 0.5
+            }
+        }
+    });
 
     const basemap = new Basemap({
         portalItem: { id: "1a03412c06cc4d4f8d8f666c8992ad95" } // Custom basemap
@@ -108,7 +136,7 @@ require([
 
     const map = new Map({
         basemap: basemap,
-        layers: [routesLayer, marketsLayer]
+        layers: [countriesLayer, routesLayer, marketsLayer]
     });
 
     const view = new MapView({
