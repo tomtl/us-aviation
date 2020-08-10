@@ -112,8 +112,23 @@ require([
             }
         ]
     };
-
     routesLayer.popupTemplate = routesPopupTemplate;
+
+    const countriesLayer = new FeatureLayer({
+        title: "countriesLayer",
+        url: "https://services2.arcgis.com/GBMwyWOj5RVtr5Jk/arcgis/rest/services/Country_borders/FeatureServer",
+        minScale: 75000000, // not visible when zoomed out beyond this scale
+        renderer: {
+            type: "simple",
+            symbol: {
+                label: "Country",
+                type: "simple-line",
+                color: "white",
+                width: 1.0,
+                opacity: 0.5
+            }
+        }
+    });
 
     const basemap = new Basemap({
         portalItem: { id: "1a03412c06cc4d4f8d8f666c8992ad95" } // Custom basemap
@@ -121,7 +136,7 @@ require([
 
     const map = new Map({
         basemap: basemap,
-        layers: [routesLayer, marketsLayer]
+        layers: [countriesLayer, routesLayer, marketsLayer]
     });
 
     const view = new MapView({
