@@ -83,8 +83,6 @@ require([
     const routesLayer = new FeatureLayer({
         title: "routesLayer",
         url: "https://services2.arcgis.com/GBMwyWOj5RVtr5Jk/arcgis/rest/services/comp_routes_20200805/FeatureServer",
-        // definitionExpression: "origin = 'BOS'",
-        // fields: ["origin", "dest"],
         renderer: {
             type: "simple",
             symbol: {
