@@ -97,6 +97,20 @@ require([
         }
     });
 
+    const lineWidthVisVar = {
+        // vary the route line width at different scales
+        type: "size",
+        valueExpression: "$view.scale",
+        stops: [
+            { value: 5000000,  size: 3 },  // size when zoomed in
+            { value: 25000000, size: 1 },  // size when zoomed out
+        ],
+        legendOptions: {
+            showLegend: "false",
+        }
+    };
+    routesLayer.renderer.visualVariables = [ lineWidthVisVar ];
+
     const routesPopupTemplate = {
         title: "{origin} - {dest}: {unique_carrier_name}",
         content: [
@@ -126,6 +140,16 @@ require([
                 color: "white",
                 width: 1.0,
                 opacity: 0.5
+            },
+            visualVariables: {
+                // make the line widths smaller as user zooms out
+                type: "size",
+                valueExpression: "$view.scale",
+                stops: [
+                    { value: 5000000,  size: 2 },   // zoomed in to state level
+                    { value: 25000000, size: 1 },   // USA level
+                    { value: 40000000, size: 0.5 }, // zoomed out to world
+                ]
             }
         }
     });
@@ -230,9 +254,9 @@ require([
 
         let routesRenderer = routesLayer.renderer.clone();
         if (filterValues.competition == false) {
-            routesRenderer.visualVariables = [opacityRenderer];
+            routesRenderer.visualVariables = [lineWidthVisVar, opacityRenderer];
         } else if (filterValues.competition == true) {
-            routesRenderer.visualVariables = [colorRenderer, opacityRenderer];
+            routesRenderer.visualVariables = [lineWidthVisVar, colorRenderer, opacityRenderer];
         }
         routesLayer.renderer = routesRenderer;
     };
