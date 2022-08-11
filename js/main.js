@@ -153,7 +153,7 @@ require([
     });
 
     const basemap = new Basemap({
-        portalItem: { id: "1a03412c06cc4d4f8d8f666c8992ad95" } // Custom basemap
+        portalItem: { id: "2e43dc6515084f2ea35d871764c517a3" } // Custom basemap
     });
 
     const map = new Map({
