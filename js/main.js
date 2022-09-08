@@ -31,7 +31,7 @@ require([
 
     // market points
     const marketsLayer = new FeatureLayer({
-        url: "https://services5.arcgis.com/ZgbrF2S4EogLlOK1/arcgis/rest/services/markets_20200705/FeatureServer",
+        url: "https://services5.arcgis.com/ZgbrF2S4EogLlOK1/arcgis/rest/services/markets_20220908/FeatureServer",
         renderer: {
             type: "simple",
             symbol: {
@@ -82,7 +82,7 @@ require([
     // routes layer
     const routesLayer = new FeatureLayer({
         title: "routesLayer",
-        url: "https://services5.arcgis.com/ZgbrF2S4EogLlOK1/arcgis/rest/services/comp_routes_20200805/FeatureServer",
+        url: "https://services5.arcgis.com/ZgbrF2S4EogLlOK1/arcgis/rest/services/comp_routes_20220908/FeatureServer",
         renderer: {
             type: "simple",
             symbol: {
