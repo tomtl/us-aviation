@@ -25,13 +25,13 @@ require([
         originAirport: "All Origin Airports",
         destMarket: "All Destination Markets",
         destAirport: "All Destination Airports",
-        year: "2019",
+        year: "2021",
         competition: false
     };
 
     // market points
     const marketsLayer = new FeatureLayer({
-        url: "https://services5.arcgis.com/ZgbrF2S4EogLlOK1/arcgis/rest/services/markets_20200705/FeatureServer",
+        url: "https://services5.arcgis.com/ZgbrF2S4EogLlOK1/arcgis/rest/services/markets_20220908/FeatureServer",
         renderer: {
             type: "simple",
             symbol: {
@@ -82,7 +82,7 @@ require([
     // routes layer
     const routesLayer = new FeatureLayer({
         title: "routesLayer",
-        url: "https://services5.arcgis.com/ZgbrF2S4EogLlOK1/arcgis/rest/services/comp_routes_20200805/FeatureServer",
+        url: "https://services5.arcgis.com/ZgbrF2S4EogLlOK1/arcgis/rest/services/comp_routes_20220908/FeatureServer",
         renderer: {
             type: "simple",
             symbol: {
@@ -117,6 +117,9 @@ require([
             text: "<p><b>Airline:</b> {unique_carrier_name}</p>" +
                 "<p><b>From:</b> {origin} - {origin_airport_name} Airport in the {origin_market_name} market area.</p>" +
                 "<p><b>To:</b> {dest} - {dest_airport_name} Airport in the {dest_market_name} market area.</p>" +
+                "<p><b>2022:</b> {pass_2022} passengers</p>" +
+                "<p><b>2021:</b> {pass_2021} passengers</p>" +
+                "<p><b>2020:</b> {pass_2020} passengers</p>" +
                 "<p><b>2019:</b> {pass_2019} passengers</p>" +
                 "<p><b>2018:</b> {pass_2018} passengers</p>" +
                 "<p><b>2017:</b> {pass_2017} passengers</p>" +
