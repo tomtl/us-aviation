@@ -25,7 +25,7 @@ require([
         originAirport: "All Origin Airports",
         destMarket: "All Destination Markets",
         destAirport: "All Destination Airports",
-        year: "2019",
+        year: "2022",
         competition: false
     };
 
@@ -117,6 +117,9 @@ require([
             text: "<p><b>Airline:</b> {unique_carrier_name}</p>" +
                 "<p><b>From:</b> {origin} - {origin_airport_name} Airport in the {origin_market_name} market area.</p>" +
                 "<p><b>To:</b> {dest} - {dest_airport_name} Airport in the {dest_market_name} market area.</p>" +
+                "<p><b>2022:</b> {pass_2022} passengers</p>" +
+                "<p><b>2021:</b> {pass_2021} passengers</p>" +
+                "<p><b>2020:</b> {pass_2020} passengers</p>" +
                 "<p><b>2019:</b> {pass_2019} passengers</p>" +
                 "<p><b>2018:</b> {pass_2018} passengers</p>" +
                 "<p><b>2017:</b> {pass_2017} passengers</p>" +
