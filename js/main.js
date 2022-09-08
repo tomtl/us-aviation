@@ -25,7 +25,7 @@ require([
         originAirport: "All Origin Airports",
         destMarket: "All Destination Markets",
         destAirport: "All Destination Airports",
-        year: "2022",
+        year: "2021",
         competition: false
     };
 
